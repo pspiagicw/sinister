@@ -1,0 +1,12 @@
+name = "sinister"
+
+[task.format]
+description = "Format the project"
+command = "go fmt ./..."
+
+[task.build]
+description = "Build the project"
+command = "go build -o $name . "
+depends = [
+    "format"
+]
