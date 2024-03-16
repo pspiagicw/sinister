@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 
+	"github.com/adrg/xdg"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/pkg/feed"
@@ -19,8 +20,9 @@ func UpdateWatched(entry *feed.Entry) {
 }
 
 func openDB() *sql.DB {
+	dbPath := getDBPath()
 
-	db, err := sql.Open("sqlite3", "sinister.db")
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		goreland.LogFatal("Error while connecting: %v", err)
 	}
@@ -28,6 +30,14 @@ func openDB() *sql.DB {
 	ensureTableExists(db)
 
 	return db
+}
+func getDBPath() string {
+	path, err := xdg.DataFile("sinister/sinister.db")
+
+	if err != nil {
+		goreland.LogFatal("Error while getting config path: %v", err)
+	}
+	return path
 }
 
 func ensureTableExists(db *sql.DB) {

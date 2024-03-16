@@ -13,8 +13,16 @@ import (
 	"github.com/pspiagicw/sinister/pkg/feed"
 )
 
+func Download(opts *argparse.Opts) {
+
+	entry := selectEntry()
+
+	performDownload(opts, entry)
+
+}
+
 func selectCreator() string {
-	creators := database.GetCreators()
+	creators := database.QueryCreators()
 
 	if len(creators) == 0 {
 		goreland.LogFatal("No creators with unwatched videos")
@@ -26,7 +34,7 @@ func selectCreator() string {
 
 }
 func selectVideo(selected string) string {
-	videos := database.GetVideos(selected)
+	videos := database.QueryVideos(selected)
 
 	if len(videos) == 0 {
 		goreland.LogFatal("No unwatched videos for creator")
@@ -37,19 +45,13 @@ func selectVideo(selected string) string {
 	return selectedVideo
 }
 
-func Download(opts *argparse.Opts) {
-
-	entry := selectEntry()
-
-	performDownload(opts, entry)
-
-}
 func selectEntry() *feed.Entry {
+
 	creator := selectCreator()
 
 	video := selectVideo(creator)
 
-	entry := database.GetEntry(creator, video)
+	entry := database.QueryEntry(creator, video)
 
 	return entry
 }

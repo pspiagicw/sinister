@@ -5,7 +5,7 @@ import (
 	"github.com/pspiagicw/sinister/pkg/feed"
 )
 
-func GetCreators() []string {
+func QueryCreators() []string {
 	db := openDB()
 
 	rows, err := db.Query("SELECT DISTINCT author FROM entries WHERE watched = 0")
@@ -29,7 +29,7 @@ func GetCreators() []string {
 
 	return creators
 }
-func GetVideos(creator string) []string {
+func QueryVideos(creator string) []string {
 	db := openDB()
 
 	rows, err := db.Query("SELECT title FROM entries WHERE author = ? AND watched = 0", creator)
@@ -53,7 +53,7 @@ func GetVideos(creator string) []string {
 
 	return videos
 }
-func GetEntry(creator, video string) *feed.Entry {
+func QueryEntry(creator, video string) *feed.Entry {
 	db := openDB()
 
 	entry := new(feed.Entry)
