@@ -5,9 +5,9 @@ import (
 	"github.com/pspiagicw/sinister/pkg/handle"
 )
 
-var VERSION string
+var VERSION string = "unversioned"
 
 func main() {
-	args := argparse.ParseArgs(VERSION)
-	handle.HandleArgs(args, VERSION)
+	args := argparse.Parse(VERSION)
+	handle.Handle(args)
 }

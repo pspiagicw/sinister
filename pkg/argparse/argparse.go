@@ -6,12 +6,22 @@ import (
 	"github.com/pspiagicw/sinister/pkg/help"
 )
 
-func ParseArgs(VERSION string) []string {
+type Opts struct {
+	Version string
+	Args    []string
+}
+
+func Parse(version string) *Opts {
+
+	opts := &Opts{}
+
 	flag.Usage = func() {
-		help.PrintHelp(VERSION)
+		help.Usage(version)
 	}
 
 	flag.Parse()
+	opts.Args = flag.Args()
+	opts.Version = version
 
-	return flag.Args()
+	return opts
 }

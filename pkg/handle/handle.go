@@ -1,38 +1,42 @@
 package handle
 
 import (
-	"fmt"
-
 	"github.com/pspiagicw/goreland"
+	"github.com/pspiagicw/sinister/pkg/argparse"
 	"github.com/pspiagicw/sinister/pkg/help"
-	"github.com/pspiagicw/sinister/pkg/update"
+	"github.com/pspiagicw/sinister/pkg/tui"
 )
 
-func HandleArgs(args []string, VERSION string) {
-	handler := map[string]func(args []string){
-		"version": func(args []string) {
-			fmt.Println(args)
+func Handle(opts *argparse.Opts) {
+
+	if len(opts.Args) == 0 {
+		help.Usage(opts.Version)
+		goreland.LogFatal("No subcommand given")
+	} else {
+		handleCmd(opts)
+	}
+}
+
+func handleCmd(opts *argparse.Opts) {
+
+	handler := map[string]func(opts *argparse.Opts){
+		"version": func(opts *argparse.Opts) {
 		},
-		"help": func(args []string) {
-			goreland.LogFatal("Not implemented yet!")
-		},
-		"status": func(args []string) {
-			goreland.LogFatal("Not implemented yet!")
-		},
-		"update": func(args []string) {
-			update.Update(args)
-		},
+		"help":     notImplemented,
+		"status":   notImplemented,
+		"update":   tui.Update,
+		"download": tui.Download,
 	}
 
-	if len(args) == 0 {
-		help.PrintHelp(VERSION)
-	} else {
-		cmd := args[0]
-		handleCmd, ok := handler[cmd]
-		if !ok {
-			goreland.LogError("subcommand %s not found", cmd)
-			help.PrintHelp(VERSION)
-		}
-		handleCmd(args)
+	cmd := opts.Args[0]
+	handleFunc, ok := handler[cmd]
+	if !ok {
+		help.Usage(opts.Version)
+		goreland.LogError("subcommand %s not found", cmd)
 	}
+	handleFunc(opts)
+}
+
+func notImplemented(opts *argparse.Opts) {
+	goreland.LogFatal("Not implemented yet!")
 }
