@@ -3,23 +3,34 @@ package config
 import (
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pspiagicw/goreland"
+	"github.com/pspiagicw/sinister/pkg/argparse"
 	"github.com/pspiagicw/sinister/pkg/help"
 )
 
 type Config struct {
-	VideoFolder string   `toml:"video_folder"`
+	VideoFolder string   `toml:"videoFolder"`
 	URLS        []string `toml:"urls"`
 }
 
-func ParseConfig() *Config {
-	path := getConfigPath()
+func ParseConfig(opts *argparse.Opts) *Config {
+	path := getConfigPath(opts)
 
 	conf := readConfig(path)
+
+	sanitizeConfig(conf)
 
 	checkConfig(conf)
 
 	return conf
+}
+func sanitizeConfig(conf *Config) {
+	path, err := homedir.Expand(conf.VideoFolder)
+	if err != nil {
+		goreland.LogFatal("Error while expanding video folder path: %v", err)
+	}
+	conf.VideoFolder = path
 }
 func checkConfig(conf *Config) {
 	if conf.VideoFolder == "" {
@@ -40,7 +51,8 @@ func readConfig(path string) *Config {
 	}
 	return &conf
 }
-func getConfigPath() string {
+func getConfigPath(opts *argparse.Opts) string {
+	// TODO: Add config file flag
 	path, err := xdg.SearchConfigFile("sinister/config.toml")
 	if err != nil {
 		help.HelpConfig()

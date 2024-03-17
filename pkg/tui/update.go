@@ -13,7 +13,7 @@ import (
 )
 
 func Update(opts *argparse.Opts) {
-	conf := config.ParseConfig()
+	conf := config.ParseConfig(opts)
 
 	for _, url := range conf.URLS {
 		goreland.LogInfo("Fetching %s", url)

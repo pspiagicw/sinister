@@ -3,12 +3,15 @@ package tui
 import (
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/kkdai/youtube/v2"
 	"github.com/manifoldco/promptui"
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/pkg/argparse"
+	"github.com/pspiagicw/sinister/pkg/config"
 	"github.com/pspiagicw/sinister/pkg/database"
 	"github.com/pspiagicw/sinister/pkg/feed"
 )
@@ -58,14 +61,14 @@ func selectEntry() *feed.Entry {
 
 func performDownload(opts *argparse.Opts, entry *feed.Entry) {
 
-	videoID := getVideoID(entry.Link.URL)
-
-	downloadVideo(videoID, opts)
+	confirmDownload()
+	downloadVideo(entry, opts)
 
 	database.UpdateWatched(entry)
 }
+func getVideo(entry *feed.Entry) (*youtube.Client, *youtube.Video) {
 
-func downloadVideo(videoID string, opts *argparse.Opts) {
+	videoID := getVideoID(entry.Link.URL)
 
 	client := youtube.Client{}
 
@@ -74,30 +77,56 @@ func downloadVideo(videoID string, opts *argparse.Opts) {
 		goreland.LogFatal("Error getting video: %s", err)
 	}
 
+	return &client, video
+}
+func selectFormat(video *youtube.Video) *youtube.Format {
 	formats := video.Formats.Quality("720p").WithAudioChannels()
 
 	formats.Sort()
 
-	stream, _, err := client.GetStream(video, &formats[0])
+	return &formats[0]
+}
+func getStream(client *youtube.Client, video *youtube.Video, format *youtube.Format) io.ReadCloser {
+	stream, _, err := client.GetStream(video, format)
+
 	if err != nil {
 		goreland.LogFatal("Error getting stream: %s", err)
 	}
 
+	return stream
+}
+
+func downloadVideo(entry *feed.Entry, opts *argparse.Opts) {
+
+	client, video := getVideo(entry)
+
+	format := selectFormat(video)
+
+	stream := getStream(client, video, format)
+
 	defer stream.Close()
 
-	fileName := videoID + ".mp4"
+	fileName := getDownloadPath(opts, entry)
 
+	file := openFile(fileName)
+
+	defer file.Close()
+
+	copyStreamToFile(stream, file)
+
+}
+func copyStreamToFile(stream io.ReadCloser, file *os.File) {
+	_, err := io.Copy(file, stream)
+	if err != nil {
+		goreland.LogFatal("Error copying stream to file: %s", err)
+	}
+}
+func openFile(fileName string) *os.File {
 	file, err := os.Create(fileName)
 	if err != nil {
 		goreland.LogFatal("Error creating file: %s", err)
 	}
-
-	defer file.Close()
-
-	_, err = io.Copy(file, stream)
-	if err != nil {
-		goreland.LogFatal("Error copying stream to file: %s", err)
-	}
+	return file
 }
 
 func getVideoID(url string) string {
@@ -117,4 +146,21 @@ func promptSelection(label string, creators []string) string {
 	}
 
 	return value
+}
+func getDownloadPath(opts *argparse.Opts, entry *feed.Entry) string {
+
+	conf := config.ParseConfig(opts)
+
+	return filepath.Join(conf.VideoFolder, entry.Slug+".mp4")
+}
+
+func confirmDownload() {
+	confirm := false
+	prompt := survey.Confirm{
+		Message: "Download the video?",
+	}
+	survey.AskOne(&prompt, &confirm)
+	if !confirm {
+		goreland.LogFatal("User cancelled the download.")
+	}
 }
