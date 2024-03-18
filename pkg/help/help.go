@@ -3,41 +3,18 @@ package help
 import (
 	"fmt"
 
-	"github.com/charmbracelet/lipgloss"
+	"github.com/pspiagicw/pelp"
 )
 
 func Usage(version string) {
 	Version(version)
-	fmt.Println("Watch youtube the Unix way")
-	fmt.Println()
-	fmt.Println("Usage: sinister [subcommand] [args]")
-	fmt.Println()
-	fmt.Println("COMMANDS")
-
-	commands := `
-update:
-download:
-status:
-help:`
-
-	messages := `
-Update subscriptions
-Download a video
-Show status
-Show this help message`
-
-	commandCol := lipgloss.NewStyle().Align(lipgloss.Left).SetString(commands).MarginLeft(2).String()
-	messageCol := lipgloss.NewStyle().Align(lipgloss.Left).SetString(messages).MarginLeft(5).String()
-
-	fmt.Println(lipgloss.JoinHorizontal(lipgloss.Bottom, commandCol, messageCol))
-	fmt.Println()
-	fmt.Println("MORE HELP")
-	fmt.Println("  Use 'sinister help [command]' for more info about a command.")
-	fmt.Println()
-	fmt.Println("EXAMPLES")
-	fmt.Println("  $ sinister update")
-	fmt.Println("  $ sinister download")
-	fmt.Println()
+	pelp.Print("Watch youtube the Unix way!")
+	pelp.HeaderWithDescription("Usage", []string{"sinister [subcommand] [args]"})
+	pelp.Aligned("commands",
+		[]string{"update:", "download:", "status:", "help:"},
+		[]string{"Update subscriptions", "Download a video", "Show status", "Show this help message"})
+	pelp.HeaderWithDescription("more help", []string{"Use 'sinister help [command]' for more info about a command."})
+	pelp.Examples("examples", []string{"sinister update", "sinister download"})
 
 }
 func Version(version string) {
@@ -47,33 +24,21 @@ func HelpConfig() {
 	fmt.Println("HELP CONFIG NOT IMPLEMENTED YET!")
 }
 func HelpUpdate() {
-	fmt.Println("Update subscriptions")
-	fmt.Println()
-	fmt.Println("USAGE")
-	fmt.Println("  sinister update")
-	fmt.Println()
-	fmt.Println("DESCRIPTION")
-	fmt.Println("  Update subscriptions according to the RSS feeds.")
-	fmt.Println()
+	pelp.Print("Update subscriptions")
+	pelp.HeaderWithDescription("Usage", []string{"sinister update"})
+	pelp.HeaderWithDescription("Description", []string{"Update subscriptions according to the RSS feeds."})
 }
 func HelpDownload() {
-	fmt.Println("Download a video")
-	fmt.Println()
-	fmt.Println("USAGE")
-	fmt.Println("  sinister download")
-	fmt.Println()
-	fmt.Println("DESCRIPTION")
-	fmt.Println("  Prompt for a creator and a video to download.")
-	fmt.Println("  The video will be marked as watched, after successfull download.")
-	fmt.Println()
+	pelp.Print("Download a video")
+	pelp.HeaderWithDescription("Usage", []string{"sinister download"})
+	pelp.HeaderWithDescription("Description",
+		[]string{
+			"Prompt for a creator and a video to download.",
+			"The video will be marked as watched, after successfull download.",
+		})
 }
 func HelpStatus() {
-	fmt.Println("Show the status of the subscriptions")
-	fmt.Println()
-	fmt.Println("USAGE")
-	fmt.Println("  sinister status")
-	fmt.Println()
-	fmt.Println("DESCRIPTION")
-	fmt.Println("  Show statistics about the subscriptions.")
-	fmt.Println()
+	pelp.Print("Show the status of the subscriptions")
+	pelp.HeaderWithDescription("Usage", []string{"sinister status"})
+	pelp.HeaderWithDescription("Description", []string{"Show statistics about the subscriptions."})
 }
