@@ -23,7 +23,7 @@ func handleCmd(opts *argparse.Opts) {
 		"version": func(opts *argparse.Opts) {
 		},
 		"help":     notImplemented,
-		"status":   notImplemented,
+		"status":   tui.Status,
 		"update":   tui.Update,
 		"download": tui.Download,
 	}

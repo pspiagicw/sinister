@@ -72,3 +72,54 @@ func QueryEntry(creator, video string) *feed.Entry {
 
 	return entry
 }
+func TotalCreators() int {
+	db := openDB()
+
+	rows, err := db.Query("SELECT DISTINCT author FROM entries")
+
+	if err != nil {
+		goreland.LogFatal("Error while querying: %v", err)
+	}
+
+	total := 0
+
+	for rows.Next() {
+		total++
+	}
+
+	return total
+}
+func TotalEntries() int {
+	db := openDB()
+
+	rows, err := db.Query("SELECT * FROM entries")
+
+	if err != nil {
+		goreland.LogFatal("Error while querying: %v", err)
+	}
+
+	total := 0
+
+	for rows.Next() {
+		total++
+	}
+
+	return total
+}
+func UnwatchedEntries() int {
+	db := openDB()
+
+	rows, err := db.Query("SELECT * FROM entries WHERE watched = 0")
+
+	if err != nil {
+		goreland.LogFatal("Error while querying: %v", err)
+	}
+
+	total := 0
+
+	for rows.Next() {
+		total++
+	}
+
+	return total
+}

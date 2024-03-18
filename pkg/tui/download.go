@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/briandowns/spinner"
 	"github.com/kkdai/youtube/v2"
 	"github.com/manifoldco/promptui"
 	"github.com/pspiagicw/goreland"
@@ -62,7 +64,15 @@ func selectEntry() *feed.Entry {
 func performDownload(opts *argparse.Opts, entry *feed.Entry) {
 
 	confirmDownload()
+
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.Start()
+
 	downloadVideo(entry, opts)
+
+	s.Stop()
+
+	goreland.LogSuccess("Download complete")
 
 	database.UpdateWatched(entry)
 }
