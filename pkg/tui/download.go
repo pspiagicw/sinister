@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"flag"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,9 +17,18 @@ import (
 	"github.com/pspiagicw/sinister/pkg/config"
 	"github.com/pspiagicw/sinister/pkg/database"
 	"github.com/pspiagicw/sinister/pkg/feed"
+	"github.com/pspiagicw/sinister/pkg/help"
 )
 
+func parseDownloadArgs(opts *argparse.Opts) {
+	flag := flag.NewFlagSet("sinister download", flag.ExitOnError)
+	flag.Usage = help.HelpDownload
+	flag.Parse(opts.Args[1:])
+}
+
 func Download(opts *argparse.Opts) {
+
+	parseDownloadArgs(opts)
 
 	entry := selectEntry()
 

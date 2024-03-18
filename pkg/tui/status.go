@@ -1,14 +1,24 @@
 package tui
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/pspiagicw/sinister/pkg/argparse"
 	"github.com/pspiagicw/sinister/pkg/config"
 	"github.com/pspiagicw/sinister/pkg/database"
+	"github.com/pspiagicw/sinister/pkg/help"
 )
 
+func parseStatusArgs(opts *argparse.Opts) {
+	flag := flag.NewFlagSet("sinister status", flag.ExitOnError)
+	flag.Usage = help.HelpStatus
+	flag.Parse(opts.Args[1:])
+}
+
 func Status(opts *argparse.Opts) {
+
+	parseStatusArgs(opts)
 	conf := config.ParseConfig(opts)
 
 	fmt.Println()

@@ -2,6 +2,7 @@ package tui
 
 import (
 	"encoding/xml"
+	"flag"
 	"io"
 	"net/http"
 
@@ -10,9 +11,16 @@ import (
 	"github.com/pspiagicw/sinister/pkg/config"
 	"github.com/pspiagicw/sinister/pkg/database"
 	"github.com/pspiagicw/sinister/pkg/feed"
+	"github.com/pspiagicw/sinister/pkg/help"
 )
 
+func parseUpdateArgs(opts *argparse.Opts) {
+	flag := flag.NewFlagSet("sinister update", flag.ExitOnError)
+	flag.Usage = help.HelpUpdate
+	flag.Parse(opts.Args[1:])
+}
 func Update(opts *argparse.Opts) {
+	parseUpdateArgs(opts)
 	conf := config.ParseConfig(opts)
 
 	for _, url := range conf.URLS {
