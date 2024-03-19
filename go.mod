@@ -7,10 +7,8 @@ require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/adrg/xdg v0.4.0
 	github.com/briandowns/spinner v1.23.0
-	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/gosimple/slug v1.14.0
 	github.com/kkdai/youtube/v2 v2.10.1
-	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pspiagicw/goreland v0.0.0-20231129143657-4b9ff8ac7ad5
@@ -20,7 +18,7 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.1 // indirect
-	github.com/chzyer/readline v1.5.1 // indirect
+	github.com/charmbracelet/lipgloss v0.10.0 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204 // indirect
 	github.com/fatih/color v1.16.0 // indirect

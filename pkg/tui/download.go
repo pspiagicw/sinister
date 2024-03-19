@@ -11,7 +11,6 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
 	"github.com/kkdai/youtube/v2"
-	"github.com/manifoldco/promptui"
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/pkg/argparse"
 	"github.com/pspiagicw/sinister/pkg/config"
@@ -157,15 +156,15 @@ func getVideoID(url string) string {
 	return id
 }
 func promptSelection(label string, creators []string) string {
-	prompt := promptui.Select{Label: label, Items: creators}
-
-	_, value, err := prompt.Run()
-
-	if err != nil {
-		goreland.LogFatal("Something went wrong: %q", err)
+	prompt := &survey.Select{
+		Message: label,
+		Options: creators,
 	}
 
-	return value
+	var selected string
+	survey.AskOne(prompt, &selected)
+
+	return selected
 }
 func getDownloadPath(opts *argparse.Opts, entry *feed.Entry) string {
 
@@ -176,9 +175,11 @@ func getDownloadPath(opts *argparse.Opts, entry *feed.Entry) string {
 
 func confirmDownload() {
 	confirm := false
+
 	prompt := survey.Confirm{
 		Message: "Download the video?",
 	}
+
 	survey.AskOne(&prompt, &confirm)
 	if !confirm {
 		goreland.LogFatal("User cancelled the download.")
