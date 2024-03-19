@@ -21,19 +21,25 @@ func handleCmd(opts *argparse.Opts) {
 
 	handler := map[string]func(opts *argparse.Opts){
 		"version": func(opts *argparse.Opts) {
+			help.Version(opts.Version)
 		},
-		"help":     notImplemented,
+		"help": func(opts *argparse.Opts) {
+			help.HandleHelp(opts.Args[1:], opts.Version)
+		},
 		"status":   tui.Status,
 		"update":   tui.Update,
 		"download": tui.Download,
+		"mark":     tui.Mark,
 	}
 
 	cmd := opts.Args[0]
 	handleFunc, ok := handler[cmd]
+
 	if !ok {
 		help.Usage(opts.Version)
-		goreland.LogError("subcommand %s not found", cmd)
+		goreland.LogFatal("subcommand %s not found", cmd)
 	}
+
 	handleFunc(opts)
 }
 

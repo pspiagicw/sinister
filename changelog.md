@@ -6,6 +6,7 @@ Adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [ Unreleased(v0.2.3) ]
 
 ### Added
+- Added 'mark' subcommand.
 - Added help printing.
 - Added 'status' subcommand.
 - Added 'update' subcommand.

@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
 	"github.com/kkdai/youtube/v2"
 	"github.com/pspiagicw/goreland"
@@ -155,33 +154,9 @@ func getVideoID(url string) string {
 	}
 	return id
 }
-func promptSelection(label string, creators []string) string {
-	prompt := &survey.Select{
-		Message: label,
-		Options: creators,
-	}
-
-	var selected string
-	survey.AskOne(prompt, &selected)
-
-	return selected
-}
 func getDownloadPath(opts *argparse.Opts, entry *feed.Entry) string {
 
 	conf := config.ParseConfig(opts)
 
 	return filepath.Join(conf.VideoFolder, entry.Slug+".mp4")
-}
-
-func confirmDownload() {
-	confirm := false
-
-	prompt := survey.Confirm{
-		Message: "Download the video?",
-	}
-
-	survey.AskOne(&prompt, &confirm)
-	if !confirm {
-		goreland.LogFatal("User cancelled the download.")
-	}
 }

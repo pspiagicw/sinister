@@ -11,8 +11,8 @@ func Usage(version string) {
 	pelp.Print("Watch youtube the Unix way!")
 	pelp.HeaderWithDescription("Usage", []string{"sinister [subcommand] [args]"})
 	pelp.Aligned("commands",
-		[]string{"update:", "download:", "status:", "help:"},
-		[]string{"Update subscriptions", "Download a video", "Show status", "Show this help message"})
+		[]string{"update:", "download:", "status:", "mark:", "help:"},
+		[]string{"Update subscriptions", "Download a video", "Show status", "Mark videos as watched (without downloading)", "Show this help message"})
 	pelp.HeaderWithDescription("more help", []string{"Use 'sinister help [command]' for more info about a command."})
 	pelp.Examples("examples", []string{"sinister update", "sinister download"})
 
@@ -41,4 +41,33 @@ func HelpStatus() {
 	pelp.Print("Show the status of the subscriptions")
 	pelp.HeaderWithDescription("Usage", []string{"sinister status"})
 	pelp.HeaderWithDescription("Description", []string{"Show statistics about the subscriptions."})
+}
+func HelpMark() {
+	pelp.Print("Mark videos as watched")
+	pelp.HeaderWithDescription("Usage", []string{"sinister mark"})
+	pelp.HeaderWithDescription("Description",
+		[]string{
+			"Prompt for a creator and videos to mark as watched.",
+			"The videos will be marked as watched.",
+		})
+}
+func HandleHelp(args []string, version string) {
+	if len(args) == 0 {
+		Usage(version)
+	} else {
+		switch args[0] {
+		case "config":
+			HelpConfig()
+		case "update":
+			HelpUpdate()
+		case "download":
+			HelpDownload()
+		case "status":
+			HelpStatus()
+		case "mark":
+			HelpMark()
+		default:
+			Usage(version)
+		}
+	}
 }

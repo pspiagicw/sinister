@@ -1,12 +1,17 @@
 name = "sinister"
 
+[variables]
+version = "0.0.1"
+ldflags = "-X main.VERSION=$version"
+
+
 [task.format]
 description = "Format the project"
 command = "go fmt ./..."
 
 [task.build]
 description = "Build the project"
-command = "go build -o $name . "
+command = 'go build -ldflags "$ldflags" -o $name . '
 depends = [
     "format"
 ]
