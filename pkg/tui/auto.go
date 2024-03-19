@@ -6,10 +6,12 @@ import (
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/pkg/argparse"
 	"github.com/pspiagicw/sinister/pkg/database"
+	"github.com/pspiagicw/sinister/pkg/help"
 )
 
 func parseAutoOpts(opts *argparse.Opts) {
 	flag := flag.NewFlagSet("sinister auto", flag.ExitOnError)
+	flag.Usage = help.HelpAuto
 	flag.Parse(opts.Args[1:])
 }
 
