@@ -30,6 +30,7 @@ func handleCmd(opts *argparse.Opts) {
 		"update":   tui.Update,
 		"download": tui.Download,
 		"mark":     tui.Mark,
+		"auto":     tui.Auto,
 	}
 
 	cmd := opts.Args[0]

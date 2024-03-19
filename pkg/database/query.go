@@ -123,3 +123,30 @@ func UnwatchedEntries() int {
 
 	return total
 }
+func QueryAll() []feed.Entry {
+	db := openDB()
+
+	rows, err := db.Query("SELECT * FROM entries WHERE watched = 0")
+
+	if err != nil {
+		goreland.LogFatal("Error while querying: %v", err)
+	}
+
+	var entries []feed.Entry
+
+	for rows.Next() {
+		entry := new(feed.Entry)
+
+		var id int
+
+		err = rows.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug)
+
+		if err != nil {
+			goreland.LogFatal("Error while scanning: %v", err)
+		}
+
+		entries = append(entries, *entry)
+	}
+
+	return entries
+}

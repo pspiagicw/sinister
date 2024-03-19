@@ -30,6 +30,8 @@ func Download(opts *argparse.Opts) {
 
 	entry := selectEntry()
 
+	confirmDownload()
+
 	performDownload(opts, entry)
 
 }
@@ -70,8 +72,6 @@ func selectEntry() *feed.Entry {
 }
 
 func performDownload(opts *argparse.Opts, entry *feed.Entry) {
-
-	confirmDownload()
 
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	s.Start()

@@ -21,12 +21,16 @@ func parseUpdateArgs(opts *argparse.Opts) {
 }
 func Update(opts *argparse.Opts) {
 	parseUpdateArgs(opts)
+	performUpdate(opts)
+}
+func performUpdate(opts *argparse.Opts) {
 	conf := config.ParseConfig(opts)
 
 	for _, url := range conf.URLS {
 		goreland.LogInfo("Fetching %s", url)
 		fetch(url)
 	}
+
 }
 
 func fetch(url string) {

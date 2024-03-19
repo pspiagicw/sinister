@@ -3,9 +3,10 @@
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 Adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [ Unreleased(v0.2.3) ]
+## [ Unreleased(v0.0.1) ]
 
 ### Added
+- Added 'auto' subcommand
 - Added 'mark' subcommand.
 - Added help printing.
 - Added 'status' subcommand.

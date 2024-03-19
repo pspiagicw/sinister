@@ -11,8 +11,15 @@ func Usage(version string) {
 	pelp.Print("Watch youtube the Unix way!")
 	pelp.HeaderWithDescription("Usage", []string{"sinister [subcommand] [args]"})
 	pelp.Aligned("commands",
-		[]string{"update:", "download:", "status:", "mark:", "help:"},
-		[]string{"Update subscriptions", "Download a video", "Show status", "Mark videos as watched (without downloading)", "Show this help message"})
+		[]string{"update:", "download:", "status:", "mark:", "auto:", "help:"},
+		[]string{
+			"Update subscriptions",
+			"Download a video",
+			"Show status",
+			"Mark videos as watched (without downloading)",
+			"Download unwatched videos automatically",
+			"Show this help message",
+		})
 	pelp.HeaderWithDescription("more help", []string{"Use 'sinister help [command]' for more info about a command."})
 	pelp.Examples("examples", []string{"sinister update", "sinister download"})
 
@@ -51,6 +58,14 @@ func HelpMark() {
 			"The videos will be marked as watched.",
 		})
 }
+func HelpAuto() {
+	pelp.Print("Download unwatched videos automatically")
+	pelp.HeaderWithDescription("Usage", []string{"sinister auto"})
+	pelp.HeaderWithDescription("Description",
+		[]string{
+			"Download unwatched videos automatically.",
+		})
+}
 func HandleHelp(args []string, version string) {
 	if len(args) == 0 {
 		Usage(version)
@@ -66,6 +81,8 @@ func HandleHelp(args []string, version string) {
 			HelpStatus()
 		case "mark":
 			HelpMark()
+		case "auto":
+			HelpAuto()
 		default:
 			Usage(version)
 		}
