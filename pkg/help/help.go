@@ -18,7 +18,7 @@ func Usage(version string) {
 
 }
 func Version(version string) {
-	fmt.Printf("sinister version: '%s'\n", version)
+	pelp.Version("sinister", version)
 }
 func HelpConfig() {
 	fmt.Println("HELP CONFIG NOT IMPLEMENTED YET!")
