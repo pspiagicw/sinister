@@ -1,7 +1,7 @@
 name = "sinister"
 
 [variables]
-version = "0.0.1"
+version = "0.1.0"
 ldflags = "-X main.VERSION=$version"
 
 
@@ -15,3 +15,7 @@ command = 'go build -ldflags "$ldflags" -o $name . '
 depends = [
     "format"
 ]
+
+[task.doc]
+description = "Build documentation"
+command = "docker run --rm -v ${pwd} :/work --user 1000:1000 pspiagicw/doc-generator"
