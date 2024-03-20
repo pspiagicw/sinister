@@ -4,42 +4,98 @@
 
 ## Config
 
+To start using `sinister`, you need to create a config file at `/home/<username>/.config/sinister/config.toml`
+
+It should look like this:
+
 ```toml
 videoFolder = "~/sources"
 urls = [
 	"https://www.youtube.com/feeds/videos.xml?channel_id=UCeeFfhMcJa1kjtfZAGskOCA",
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCdBK94H6oZT2Q7l0-b0xmMg",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UC0vBXGSyV14uvJ4hECDOl0Q",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCHDxYLv8iovIbhrfl16CNyg",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCld68syR8Wi-GY_n4CaoJGA",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UC0rE2qq81of4fojo-KhO5rg",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCxzC4EngIsMrPmbm6Nxvb-A",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UC6uKrU_WqJ1R2HMTY3LIx5Q",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCBNHHEoiSF8pcLgqLKVugOw",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCrqM0Ym_NbK1fqeQG2VIohg",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCd3dNckv1Za2coSaHGHl5aA",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCUyeluBRhGPCW4rPe_UvBZQ",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCSju5G2aFaWMqn-_0YBtq5A",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCR6LasBpceuYUhuLToKBzvQ",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCb_MAhL8Thb3HJ_wPkH3gcw",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCaSCt8s_4nfkRglWCvNSDrg",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCJfJWct8jN1RpCuVWk3zHTA",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCv1Kcz-CuGM6mxzL3B1_Eiw",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCqJ-Xo29CKyLTjn6z2XwYAw",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UC6me-RzbQFQ-kRyr6BlGZWg",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCbxQcz9k0NRRuy0ukgQTDQQ"
 ]
 ```
 
-`sinister` expects RSS feeds of Youtube Channels in it's config file.
+The `urls` are RSS feeds of the channels you want to sync.
 
-You can run `sinister update` to update the database.
+> Channel URL don't work, only RSS feeds work.
 
-Then you can run `sinister download`, to download a unwatched video.
+To extract the RSS feed of a youtube channel, see [below](#disclaimer)
 
+## Installation
 
+You can install `sinister` by downloading a binary from the [releases](https://github.com/pspiagicw/sinister/releases) page.
+
+Or if you have the `Go` compiler installed. Use
+
+```sh
+go install github.com/pspiagicw/sinister@latest
+```
+
+If you use [`gox`](https://github.com/pspiagicw/gox) to manage binary packages, you can run
+
+```
+gox install github.com/pspiagicw/sinister@latest
+```
+
+## Usage
+
+### `update`
+
+If the config file is set up, you can run `sinister update` to update the database.
+
+This will query the RSS feeds for the latest videos and update the databaseo
+
+![update](./gifs/update.gif)
+
+### `status`
+
+This shows the state of the database.
+
+It gives you general statistics like unwatched videos, watched videos, etc.
+
+![status](./gifs/status.gif)
+
+### `download`
+
+This downloads videos according the prompt given. It will download it to the `videoFolder` specified in the config file.
+
+The download will be in 720p in the mp4 format.
+
+![download](./gifs/download.gif)
+
+### `mark`
+
+This can be used to mark a video as watched (Even though you didn't download it)
+
+It can multi-select videos to mark as watched.
+
+![mark](./gifs/mark.gif)
+
+### `auto`
+
+This is a combination of `update` and `download`. 
+It will update the database and download the latest videos.
+
+It is designed to be used in a cron job or a systemd timer. 
+
+![auto](./gifs/auto.gif)
+
+## Youtube RSS Feeds
+
+There are multiple ways of getting the RSS feed of a youtube channel.
+
+One sureshot method is to view the page source (of the channel page) and search for `rss`
+
+There are some other resources for this:
+
+- [Feeder](https://feeder.co/knowledge-base/rss-feed-creation/youtube-rss/)
+
+## Contributing
+
+If you want to contribute, you can open an issue or a pull request.
+
+## Disclaimer
+
+Downloading videos from Youtube is against their terms of service. Use at your own risk.
 
