@@ -6,6 +6,7 @@ Adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Unreleased(v0.1.0)
 
 ### Added
+- Added LICENSE, README.md and gifs.
 - Added 'auto' subcommand
 - Added 'mark' subcommand.
 - Added help printing.

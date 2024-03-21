@@ -46,3 +46,27 @@ func ensureTableExists(db *sql.DB) {
 		goreland.LogFatal("Error while creating table: %v", err)
 	}
 }
+func scanStrings(rows *sql.Rows) []string {
+	var elements []string
+
+	for rows.Next() {
+		var element string
+		err := rows.Scan(&element)
+		if err != nil {
+			goreland.LogFatal("Error while scanning: %v", err)
+		}
+		elements = append(elements, element)
+	}
+
+	return elements
+}
+func runQuery(db *sql.DB, query string, args ...interface{}) *sql.Rows {
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		goreland.LogFatal("Error while querying: %v", err)
+	}
+
+	return rows
+
+}

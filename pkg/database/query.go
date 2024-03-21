@@ -13,16 +13,7 @@ func QueryCreators() []string {
 		goreland.LogFatal("Error while querying: %v", err)
 	}
 
-	var creators []string
-
-	for rows.Next() {
-		var creator string
-		err = rows.Scan(&creator)
-		if err != nil {
-			goreland.LogFatal("Error while scanning: %v", err)
-		}
-		creators = append(creators, creator)
-	}
+	creators := scanStrings(rows)
 
 	rows.Close()
 	defer db.Close()
@@ -37,16 +28,7 @@ func QueryVideos(creator string) []string {
 		goreland.LogFatal("Error while querying: %v", err)
 	}
 
-	var videos []string
-
-	for rows.Next() {
-		var video string
-		err = rows.Scan(&video)
-		if err != nil {
-			goreland.LogFatal("Error while scanning: %v", err)
-		}
-		videos = append(videos, video)
-	}
+	videos := scanStrings(rows)
 
 	rows.Close()
 	defer db.Close()
@@ -75,45 +57,40 @@ func QueryEntry(creator, video string) *feed.Entry {
 func TotalCreators() int {
 	db := openDB()
 
-	rows, err := db.Query("SELECT DISTINCT author FROM entries")
-
-	if err != nil {
-		goreland.LogFatal("Error while querying: %v", err)
-	}
+	rows := runQuery(db, "SELECT DISTINCT author FROM entries")
 
 	total := 0
 
 	for rows.Next() {
 		total++
 	}
+
+	rows.Close()
+	db.Close()
 
 	return total
 }
 func TotalEntries() int {
+
 	db := openDB()
 
-	rows, err := db.Query("SELECT * FROM entries")
-
-	if err != nil {
-		goreland.LogFatal("Error while querying: %v", err)
-	}
+	rows := runQuery(db, "SELECT * FROM entries")
 
 	total := 0
 
 	for rows.Next() {
 		total++
 	}
+
+	rows.Close()
+	db.Close()
 
 	return total
 }
 func UnwatchedEntries() int {
 	db := openDB()
 
-	rows, err := db.Query("SELECT * FROM entries WHERE watched = 0")
-
-	if err != nil {
-		goreland.LogFatal("Error while querying: %v", err)
-	}
+	rows := runQuery(db, "SELECT * FROM entries WHERE watched = 0")
 
 	total := 0
 
@@ -121,16 +98,15 @@ func UnwatchedEntries() int {
 		total++
 	}
 
+	rows.Close()
+	db.Close()
+
 	return total
 }
 func QueryAll() []feed.Entry {
 	db := openDB()
 
-	rows, err := db.Query("SELECT * FROM entries WHERE watched = 0")
-
-	if err != nil {
-		goreland.LogFatal("Error while querying: %v", err)
-	}
+	rows := runQuery(db, "SELECT * FROM entries WHERE watched = 0")
 
 	var entries []feed.Entry
 
@@ -139,7 +115,7 @@ func QueryAll() []feed.Entry {
 
 		var id int
 
-		err = rows.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug)
+		err := rows.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug)
 
 		if err != nil {
 			goreland.LogFatal("Error while scanning: %v", err)
@@ -148,5 +124,7 @@ func QueryAll() []feed.Entry {
 		entries = append(entries, *entry)
 	}
 
+	rows.Close()
+	db.Close()
 	return entries
 }

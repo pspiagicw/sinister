@@ -9,10 +9,11 @@ To start using `sinister`, you need to create a config file at `/home/<username>
 It should look like this:
 
 ```toml
-videoFolder = "~/sources"
+videoFolder = "~/Videos"
+
 urls = [
 	"https://www.youtube.com/feeds/videos.xml?channel_id=UCeeFfhMcJa1kjtfZAGskOCA",
-    "https://www.youtube.com/feeds/videos.xml?channel_id=UCdBK94H6oZT2Q7l0-b0xmMg",
+    "https://www.youtube.com/feeds/videos.xml?channel_id=UCdBK94H6oZT2Q7l0-b0xmMg"
 ]
 ```
 
@@ -21,6 +22,12 @@ urls = [
 
 > Channel URL don't work, only RSS feeds work.
 
+## Features
+
+- Tracks your subscription using RSS feeds and download whatever you are interested in.
+- Remove the web interface and watch videos in your favorite video player.
+- No recommendations, no ads, no distractions.
+- Treat Youtube like a news feed.
 
 ## Installation
 
@@ -76,6 +83,7 @@ gox install github.com/pspiagicw/sinister@latest
 - This is a combination of `update` and `download`. 
 - It will update the database and download the latest videos.
 - It is designed to be used in a cron job or a systemd timer. 
+- It can be used to keep your video library up to date.
 
 ![auto](./gifs/auto.gif)
 
