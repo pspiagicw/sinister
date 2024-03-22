@@ -24,8 +24,8 @@ func Mark(opts *argparse.Opts) {
 
 	selectedVideos := promptMultiple("Select videos to mark watched", videos)
 
-	for _, video := range selectedVideos {
-		entry := database.QueryEntry(creator, video)
+	for _, index := range selectedVideos {
+		entry := database.QueryEntry(creator, videos[index])
 		goreland.LogInfo("Marking %s by %s as watched", entry.Title, entry.Author.Name)
 		database.UpdateWatched(entry)
 	}

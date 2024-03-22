@@ -38,6 +38,7 @@ func HelpUpdate() {
 func HelpDownload() {
 	pelp.Print("Download a video")
 	pelp.HeaderWithDescription("Usage", []string{"sinister download"})
+	pelp.Flags("flag", []string{"no-spinner"}, []string{"Disable spinner"})
 	pelp.HeaderWithDescription("Description",
 		[]string{
 			"Prompt for a creator and a video to download.",
@@ -66,6 +67,14 @@ func HelpAuto() {
 			"Download unwatched videos automatically.",
 		})
 }
+func HelpBinge() {
+	pelp.Print("Select a bunch of videos to download.")
+	pelp.HeaderWithDescription("Usage", []string{"sinister binge"})
+	pelp.HeaderWithDescription("Description",
+		[]string{
+			"Select a bunch of videos to download.",
+		})
+}
 func HandleHelp(args []string, version string) {
 	if len(args) == 0 {
 		Usage(version)
@@ -83,6 +92,8 @@ func HandleHelp(args []string, version string) {
 			HelpMark()
 		case "auto":
 			HelpAuto()
+		case "binge":
+			HelpBinge()
 		default:
 			Usage(version)
 		}

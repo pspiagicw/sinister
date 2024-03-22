@@ -20,6 +20,7 @@ import (
 
 func parseDownloadArgs(opts *argparse.Opts) {
 	flag := flag.NewFlagSet("sinister download", flag.ExitOnError)
+	flag.BoolVar(&opts.NoSpinner, "no-spinner", false, "Disable spinner")
 	flag.Usage = help.HelpDownload
 	flag.Parse(opts.Args[1:])
 }
@@ -37,6 +38,7 @@ func Download(opts *argparse.Opts) {
 }
 
 func selectCreator() string {
+
 	creators := database.QueryCreators()
 
 	if len(creators) == 0 {
@@ -45,7 +47,7 @@ func selectCreator() string {
 
 	selected := promptSelection("Select creator", creators)
 
-	return selected
+	return creators[selected]
 
 }
 func selectVideo(selected string) string {
@@ -57,7 +59,7 @@ func selectVideo(selected string) string {
 
 	selectedVideo := promptSelection("Select video", videos)
 
-	return selectedVideo
+	return videos[selectedVideo]
 }
 
 func selectEntry() *feed.Entry {
@@ -71,14 +73,28 @@ func selectEntry() *feed.Entry {
 	return entry
 }
 
-func performDownload(opts *argparse.Opts, entry *feed.Entry) {
+func startSpinner(opts *argparse.Opts) func() {
+
+	if opts.NoSpinner {
+		return func() {}
+	}
 
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+
 	s.Start()
+
+	return func() {
+		s.Stop()
+	}
+}
+
+func performDownload(opts *argparse.Opts, entry *feed.Entry) {
+
+	stopFunc := startSpinner(opts)
 
 	downloadVideo(entry, opts)
 
-	s.Stop()
+	stopFunc()
 
 	goreland.LogSuccess("Download complete")
 

@@ -17,19 +17,19 @@ func confirmDownload() {
 		goreland.LogFatal("User cancelled the download.")
 	}
 }
-func promptSelection(label string, options []string) string {
+func promptSelection(label string, options []string) int {
 	prompt := &survey.Select{
 		Message: label,
 		Options: options,
 	}
 
-	var selected string
+	var selected int
 	survey.AskOne(prompt, &selected)
 
 	return selected
 }
-func promptMultiple(label string, options []string) []string {
-	choices := make([]string, 0)
+func promptMultiple(label string, options []string) []int {
+	choices := make([]int, 0)
 
 	prompt := &survey.MultiSelect{
 		Message: label,

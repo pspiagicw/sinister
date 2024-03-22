@@ -29,6 +29,7 @@ func handleCmd(opts *argparse.Opts) {
 		"status":   tui.Status,
 		"update":   tui.Update,
 		"download": tui.Download,
+		"binge":    tui.Binge,
 		"mark":     tui.Mark,
 		"auto":     tui.Auto,
 	}

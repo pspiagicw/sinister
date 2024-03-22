@@ -9,6 +9,9 @@ import (
 type Opts struct {
 	Version string
 	Args    []string
+
+	// Subcommand fields
+	NoSpinner bool
 }
 
 func Parse(version string) *Opts {
