@@ -26,7 +26,7 @@ func Update(opts *argparse.Opts) {
 func performUpdate(opts *argparse.Opts) {
 	conf := config.ParseConfig(opts)
 
-	for _, url := range conf.URLS {
+	for _, url := range conf.GetURLs() {
 		goreland.LogInfo("Fetching %s", url)
 		fetch(url)
 	}

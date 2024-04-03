@@ -32,6 +32,7 @@ func Status(opts *argparse.Opts) {
 	}
 
 	fmt.Println()
+
 	totalEntries := database.TotalEntries()
 	totalCreators := database.TotalCreators()
 	fmt.Println("Total Videos: ", totalEntries)
@@ -40,4 +41,13 @@ func Status(opts *argparse.Opts) {
 	unwatchedEntries := database.UnwatchedEntries()
 
 	fmt.Println("Unwatched Videos: ", unwatchedEntries)
+}
+func printFeed(feed string, value config.Feed) {
+	fmt.Println("Feed: ", feed)
+	fmt.Println("URL: ", value.URL)
+	fmt.Println("Tags: ")
+	for _, tag := range value.Tags {
+		fmt.Printf("- %s\n", tag)
+	}
+	fmt.Println()
 }

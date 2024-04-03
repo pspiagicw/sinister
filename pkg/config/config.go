@@ -10,8 +10,26 @@ import (
 )
 
 type Config struct {
-	VideoFolder string   `toml:"videoFolder"`
-	URLS        []string `toml:"urls"`
+	VideoFolder string          `toml:"videoFolder"`
+	URLS        []string        `toml:"urls"`
+	Feeds       map[string]Feed `toml:"feed"`
+}
+type Feed struct {
+	URL  string   `toml:"url"`
+	Tags []string `toml:"tags"`
+}
+
+func (c Config) GetURLs() []string {
+	urls := make([]string, 0)
+	for _, url := range c.URLS {
+		urls = append(urls, url)
+	}
+
+	for _, feed := range c.Feeds {
+		urls = append(urls, feed.URL)
+	}
+
+	return urls
 }
 
 func ParseConfig(opts *argparse.Opts) *Config {
