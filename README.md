@@ -89,6 +89,10 @@ gox install github.com/pspiagicw/sinister@latest
 
 ![auto](./gifs/auto.gif)
 
+- Filters include `--days`
+
+![auto-filter](./gifs/auto-filter.gif)
+
 ## Youtube RSS Feeds
 
 There are multiple ways of getting the RSS feed of a youtube channel.
