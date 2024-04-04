@@ -12,6 +12,10 @@ type Opts struct {
 
 	// Subcommand fields
 	NoSpinner bool
+
+	// Auto fields
+	Days   int
+	NoSync bool
 }
 
 func Parse(version string) *Opts {

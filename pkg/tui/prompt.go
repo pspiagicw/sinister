@@ -17,6 +17,30 @@ func confirmDownload() {
 		goreland.LogFatal("User cancelled the download.")
 	}
 }
+func confirm(message, error string) {
+	confirm := false
+
+	prompt := survey.Confirm{
+		Message: message,
+	}
+
+	survey.AskOne(&prompt, &confirm)
+	if !confirm {
+		goreland.LogFatal(error)
+	}
+
+}
+func softConfirm(message string) bool {
+	confirm := false
+
+	prompt := survey.Confirm{
+		Message: message,
+	}
+
+	survey.AskOne(&prompt, &confirm)
+
+	return confirm
+}
 func promptSelection(label string, options []string) int {
 	prompt := &survey.Select{
 		Message: label,

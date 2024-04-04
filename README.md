@@ -84,6 +84,8 @@ gox install github.com/pspiagicw/sinister@latest
 - It will update the database and download the latest videos.
 - It is designed to be used in a cron job or a systemd timer. 
 - It can be used to keep your video library up to date.
+- It can filter videos according to flags provided.
+- See `sinister auto --help` for more information.
 
 ![auto](./gifs/auto.gif)
 

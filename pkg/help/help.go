@@ -66,6 +66,11 @@ func HelpAuto() {
 		[]string{
 			"Download unwatched videos automatically.",
 		})
+
+	pelp.Flags(
+		"flag",
+		[]string{"days", "no-sync"},
+		[]string{"Maximum number of days to download", "Don't sync"})
 }
 func HelpBinge() {
 	pelp.Print("Select a bunch of videos to download.")
