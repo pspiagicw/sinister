@@ -86,6 +86,8 @@ github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1n
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/pspiagicw/fs v0.0.0-20240412053716-83196aadc37c h1:aStvB+j8eO/VyPxP3jbZVK7HCm4YEA+dAaa0l+l1oPw=
+github.com/pspiagicw/fs v0.0.0-20240412053716-83196aadc37c/go.mod h1:36S2s+6McEuewyXRbbkbbyOR4zSdzpmv12PD+NJrKyQ=
 github.com/pspiagicw/goreland v0.0.0-20231129143657-4b9ff8ac7ad5 h1:vtXgJQnlbnQLdA2FvtdZ5CEeex9+oj8Db5SgcZW807c=
 github.com/pspiagicw/goreland v0.0.0-20231129143657-4b9ff8ac7ad5/go.mod h1:w9C97TNLperGU930lN/hc2XuWUlYzPbBUW1OA1ka4DM=
 github.com/pspiagicw/pelp v0.0.0-20240318161701-7448ea2e376e h1:N0ZhzS8AdPstCIV7eti5BOXhen73DjGj0+d393GXWcU=

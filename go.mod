@@ -11,6 +11,7 @@ require (
 	github.com/kkdai/youtube/v2 v2.10.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pspiagicw/fs v0.0.0-20240412053716-83196aadc37c
 	github.com/pspiagicw/goreland v0.0.0-20231129143657-4b9ff8ac7ad5
 	github.com/pspiagicw/pelp v0.0.0-20240318161701-7448ea2e376e
 )
