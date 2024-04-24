@@ -70,7 +70,9 @@ func readConfig(path string) *Config {
 	return &conf
 }
 func getConfigPath(opts *argparse.Opts) string {
-	// TODO: Add config file flag
+	if opts.Config != "" {
+		return opts.Config
+	}
 	path, err := xdg.SearchConfigFile("sinister/config.toml")
 	if err != nil {
 		help.HelpConfig()

@@ -12,7 +12,8 @@ command = "go fmt ./..."
 [task.build]
 description = "Build the project"
 command = 'go build -ldflags "$ldflags" -o $name . '
-environment = [ "CGO_ENABLED=0" ]
+# Can't actuall disable CGO, as sqlite3 needs it.
+environment = [ "CGO_ENABLED=1" ]
 depends = [
     "format"
 ]

@@ -20,6 +20,7 @@ func Usage(version string) {
 			"Download unwatched videos automatically",
 			"Show this help message",
 		})
+	pelp.Flags("flag", []string{"config"}, []string{"Provide alternate path to config file."})
 	pelp.HeaderWithDescription("more help", []string{"Use 'sinister help [command]' for more info about a command."})
 	pelp.Examples("examples", []string{"sinister update", "sinister download"})
 

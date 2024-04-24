@@ -10,6 +10,9 @@ type Opts struct {
 	Version string
 	Args    []string
 
+	// Alternate config file
+	Config string
+
 	// Subcommand fields
 	NoSpinner bool
 
@@ -25,6 +28,8 @@ func Parse(version string) *Opts {
 	flag.Usage = func() {
 		help.Usage(version)
 	}
+
+	flag.StringVar(&opts.Config, "config", "", "Path to the configuration file")
 
 	flag.Parse()
 	opts.Args = flag.Args()

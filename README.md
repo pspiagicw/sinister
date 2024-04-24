@@ -6,6 +6,8 @@
 
 To start using `sinister`, you need to create a config file at `/home/<username>/.config/sinister/config.toml`
 
+- You can use the `--config` argument to pass in a alternate config file location.
+
 It should look like this:
 
 ```toml
@@ -21,6 +23,8 @@ urls = [
 - To extract the RSS feed of a youtube channel, see [below](#disclaimer)
 
 > Channel URL don't work, only RSS feeds work.
+
+
 
 ## Features
 
