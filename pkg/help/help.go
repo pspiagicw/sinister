@@ -98,8 +98,6 @@ func HandleHelp(args []string, version string) {
 			HelpMark()
 		case "auto":
 			HelpAuto()
-		case "binge":
-			HelpBinge()
 		default:
 			Usage(version)
 		}
