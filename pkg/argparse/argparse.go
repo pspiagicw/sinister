@@ -17,8 +17,9 @@ type Opts struct {
 	NoSpinner bool
 
 	// Auto fields
-	Days   int
-	NoSync bool
+	Days        int
+	NoSync      bool
+	MarkWatched bool
 }
 
 func Parse(version string) *Opts {

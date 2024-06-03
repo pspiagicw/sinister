@@ -70,8 +70,8 @@ func HelpAuto() {
 
 	pelp.Flags(
 		"flag",
-		[]string{"days", "no-sync"},
-		[]string{"Maximum number of days to download", "Don't sync"})
+		[]string{"days", "no-sync", "mark-watched"},
+		[]string{"Maximum number of days to download", "Don't sync", "Mark videos as watched when rejected"})
 }
 func HelpBinge() {
 	pelp.Print("Select a bunch of videos to download.")

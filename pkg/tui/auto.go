@@ -16,6 +16,7 @@ func parseAutoOpts(opts *argparse.Opts) {
 	flag := flag.NewFlagSet("sinister auto", flag.ExitOnError)
 	flag.IntVar(&opts.Days, "days", 0, "Maximum number of days to download")
 	flag.BoolVar(&opts.NoSync, "no-sync", false, "Disable spinner")
+	flag.BoolVar(&opts.MarkWatched, "mark-watched", false, "Mark videos as watched when rejected")
 	flag.Usage = help.HelpAuto
 	flag.Parse(opts.Args[1:])
 }
@@ -44,8 +45,11 @@ func Auto(opts *argparse.Opts) {
 
 		if softConfirm(fmt.Sprintf("Download %s by %s ?", entry.Title, entry.Author.Name)) {
 			performDownload(opts, &entry)
+		} else {
+			if opts.MarkWatched {
+				database.UpdateWatched(&entry)
+			}
 		}
-
 	}
 
 	goreland.LogSuccess("All downloads completed!")
