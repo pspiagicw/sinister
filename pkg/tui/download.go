@@ -118,6 +118,10 @@ func selectFormat(video *youtube.Video) *youtube.Format {
 
 	formats.Sort()
 
+	if len(formats) == 0 {
+		goreland.LogFatal("No suitable formats found")
+	}
+
 	return &formats[0]
 }
 func getStream(client *youtube.Client, video *youtube.Video, format *youtube.Format) io.ReadCloser {
