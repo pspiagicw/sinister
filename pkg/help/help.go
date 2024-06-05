@@ -1,10 +1,22 @@
 package help
 
 import (
-	"fmt"
-
 	"github.com/pspiagicw/pelp"
 )
+
+const EXAMPLE_CONFIG = `
+--------
+
+videoFolder = "~/Videos"
+urls = [
+    "https://www.youtube.com/feeds/videos.xml?channel_id=UCeeFfhMcJa1kjtfZAGskOCA",
+    "https://www.youtube.com/feeds/videos.xml?channel_id=UCdBK94H6oZT2Q7l0-b0xmMg",
+]
+
+quality = "720"
+
+----
+`
 
 func Usage(version string) {
 	Version(version)
@@ -29,7 +41,32 @@ func Version(version string) {
 	pelp.Version("sinister", version)
 }
 func HelpConfig() {
-	fmt.Println("HELP CONFIG NOT IMPLEMENTED YET!")
+	// fmt.Println("HELP CONFIG NOT IMPLEMENTED YET!")
+	pelp.Print("Configure `sinister`")
+	pelp.HeaderWithDescription("Path", []string{
+		"The configuration will be searched at `~/.config/sinister/config.toml``",
+		"Use the `--config` flag to provide an alternate path to the configuration file.",
+	})
+	pelp.HeaderWithDescription("Format", []string{
+		"The configuration file is in TOML format.",
+		"The configuration file should have the following fields",
+	})
+
+	pelp.Aligned(
+		"Fields",
+		[]string{
+			"videoFolder:",
+			"urls:",
+			"quality:",
+		},
+		[]string{
+			"The folder where the videos will be downloaded.",
+			"A list of URLs to subscribe to.",
+			"The quality of the video to download. (e.g. 720p, 1080p)",
+		})
+
+	pelp.Print("Example configuration file.")
+	pelp.Print(EXAMPLE_CONFIG)
 }
 func HelpUpdate() {
 	pelp.Print("Update subscriptions")
