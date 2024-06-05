@@ -2,6 +2,7 @@ package tui
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -21,6 +22,7 @@ import (
 func parseDownloadArgs(opts *argparse.Opts) {
 	flag := flag.NewFlagSet("sinister download", flag.ExitOnError)
 	flag.BoolVar(&opts.NoSpinner, "no-spinner", false, "Disable spinner")
+	flag.BoolVar(&opts.Format, "select-format", false, "Select format manually")
 	flag.Usage = help.HelpDownload
 	flag.Parse(opts.Args[1:])
 }
@@ -75,7 +77,7 @@ func selectEntry() *feed.Entry {
 
 func startSpinner(opts *argparse.Opts) func() {
 
-	if opts.NoSpinner {
+	if opts.NoSpinner || opts.Format {
 		return func() {}
 	}
 
@@ -113,10 +115,30 @@ func getVideo(entry *feed.Entry) (*youtube.Client, *youtube.Video) {
 
 	return &client, video
 }
-func selectFormat(video *youtube.Video) *youtube.Format {
-	formats := video.Formats.Quality("720p").WithAudioChannels()
+func formatListString(formats youtube.FormatList) []string {
+	results := []string{}
+	for _, format := range formats {
+		line := fmt.Sprintf("Quality: %s, Bitrate: %d", format.Quality, format.Bitrate)
+		results = append(results, line)
+	}
+
+	return results
+}
+func selectFormat(video *youtube.Video, opts *argparse.Opts) *youtube.Format {
+	formats := video.Formats
 
 	formats.Sort()
+
+	if opts.Format {
+		index := promptSelection("Select format", formatListString(formats))
+		return &formats[index]
+	}
+
+	conf := config.ParseConfig(opts)
+
+	formatQuery := conf.Quality
+
+	formats = formats.Quality(formatQuery).WithAudioChannels()
 
 	if len(formats) == 0 {
 		goreland.LogFatal("No suitable formats found")
@@ -138,7 +160,7 @@ func downloadVideo(entry *feed.Entry, opts *argparse.Opts) {
 
 	client, video := getVideo(entry)
 
-	format := selectFormat(video)
+	format := selectFormat(video, opts)
 
 	stream := getStream(client, video, format)
 

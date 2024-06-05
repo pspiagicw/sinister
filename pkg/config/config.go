@@ -13,6 +13,7 @@ type Config struct {
 	VideoFolder string          `toml:"videoFolder"`
 	URLS        []string        `toml:"urls"`
 	Feeds       map[string]Feed `toml:"feed"`
+	Quality     string          `toml:"quality"`
 }
 type Feed struct {
 	URL  string   `toml:"url"`
@@ -58,6 +59,10 @@ func checkConfig(conf *Config) {
 	if len(conf.URLS) == 0 {
 		help.HelpConfig()
 		goreland.LogFatal("No URLs set in config file")
+	}
+	if conf.Quality == "" {
+		help.HelpConfig()
+		goreland.LogFatal("Quality not set in config file")
 	}
 }
 

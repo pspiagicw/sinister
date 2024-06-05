@@ -20,6 +20,7 @@ type Opts struct {
 	Days        int
 	NoSync      bool
 	MarkWatched bool
+	Format      bool
 }
 
 func Parse(version string) *Opts {

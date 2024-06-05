@@ -39,7 +39,7 @@ func HelpUpdate() {
 func HelpDownload() {
 	pelp.Print("Download a video")
 	pelp.HeaderWithDescription("Usage", []string{"sinister download"})
-	pelp.Flags("flag", []string{"no-spinner"}, []string{"Disable spinner"})
+	pelp.Flags("flag", []string{"no-spinner", "select-format"}, []string{"Disable spinner", "Select format manually"})
 	pelp.HeaderWithDescription("Description",
 		[]string{
 			"Prompt for a creator and a video to download.",
