@@ -17,6 +17,8 @@ urls = [
 "https://www.youtube.com/feeds/videos.xml?channel_id=UCeeFfhMcJa1kjtfZAGskOCA",
 "https://www.youtube.com/feeds/videos.xml?channel_id=UCdBK94H6oZT2Q7l0-b0xmMg"
 ]
+
+quality = "hd720"
 ```
 
 - The `urls` are RSS feeds of the channels you want to sync.
