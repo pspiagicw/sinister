@@ -1,8 +1,44 @@
 # `sinister`
 
-`sinister` is a tool to sync and download videos from Youtube.
+`sinister` is a tool to track and download videos from YouTube.
 
-## config
+- [sinister](#sinister)
+    - [features](#features)
+    - [installation](#installation)
+    - [config](#config)
+    - [usage](#usage)
+        - [update](#update)
+        - [status](#status)
+        - [download](#download)
+        - [mark](#mark)
+        - [auto](#auto)
+    - [RSS Feeds](#youtube-rss-feeds)
+    - [Contribution](#youtube-rss-feeds)
+
+# Features
+
+- Tracks your subscription using RSS feeds and download whatever you are interested in.
+- Remove the web interface and watch videos in your favorite video player.
+- No recommendations, no ads, no distractions.
+- Treat Youtube like a news feed.
+
+# Installation
+
+You can install `sinister` by downloading a binary from the [releases](https://github.com/pspiagicw/sinister/releases) page.
+
+Or if you have the `Go` compiler installed. Use
+
+```sh
+go install github.com/pspiagicw/sinister@latest
+```
+
+If you use [`gox`](https://github.com/pspiagicw/gox) to manage binary packages, you can run
+
+```
+gox install github.com/pspiagicw/sinister@latest
+```
+
+# Config
 
 To start using `sinister`, you need to create a config file at `/home/<username>/.config/sinister/config.toml`
 
@@ -27,31 +63,7 @@ quality = "hd720"
 > Channel URL don't work, only RSS feeds work.
 
 
-
-## Features
-
-- Tracks your subscription using RSS feeds and download whatever you are interested in.
-- Remove the web interface and watch videos in your favorite video player.
-- No recommendations, no ads, no distractions.
-- Treat Youtube like a news feed.
-
-## Installation
-
-You can install `sinister` by downloading a binary from the [releases](https://github.com/pspiagicw/sinister/releases) page.
-
-Or if you have the `Go` compiler installed. Use
-
-```sh
-go install github.com/pspiagicw/sinister@latest
-```
-
-If you use [`gox`](https://github.com/pspiagicw/gox) to manage binary packages, you can run
-
-```
-gox install github.com/pspiagicw/sinister@latest
-```
-
-## Usage
+# Usage
 
 ### `update`
 
@@ -99,7 +111,7 @@ gox install github.com/pspiagicw/sinister@latest
 
 ![auto-filter](./gifs/auto-filter.gif)
 
-## Youtube RSS Feeds
+# Youtube RSS Feeds
 
 There are multiple ways of getting the RSS feed of a youtube channel.
 
@@ -109,11 +121,11 @@ There are some other resources for this:
 
 - [Feeder](https://feeder.co/knowledge-base/rss-feed-creation/youtube-rss/)
 
-## Contributing
+# Contributing
 
-If you want to contribute, you can open an issue or a pull request.
+If you want to contribute, you can open an issue or a pull request on [GitHub](https://github.com/pspiagicw/sinister).
 
-## Disclaimer
+# Disclaimer
 
 Downloading videos from Youtube is against their terms of service. Use at your own risk.
 
