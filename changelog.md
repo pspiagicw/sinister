@@ -3,7 +3,7 @@
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 Adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased(v0.1.0)
+## v0.1.0
 
 ### Added
 - Added the `--select-format` to the `download subcommand.`
