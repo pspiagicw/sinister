@@ -1,4 +1,4 @@
-package tui
+package manage
 
 import (
 	"flag"

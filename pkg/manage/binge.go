@@ -1,4 +1,4 @@
-package tui
+package manage
 
 import (
 	"flag"
@@ -18,7 +18,7 @@ func Binge(opts *argparse.Opts) {
 
 	parseBingeArgs(opts)
 
-	entries := database.QueryAll()
+	entries := database.QueryUnwatched()
 
 	names := []string{}
 

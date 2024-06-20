@@ -1,4 +1,4 @@
-package tui
+package manage
 
 import (
 	"flag"
@@ -38,7 +38,7 @@ func Status(opts *argparse.Opts) {
 	fmt.Println("Total Videos: ", totalEntries)
 	fmt.Println("Total Creators: ", totalCreators)
 
-	unwatchedEntries := database.UnwatchedEntries()
+	unwatchedEntries := database.CountUnwatched()
 
 	fmt.Println("Unwatched Videos: ", unwatchedEntries)
 }

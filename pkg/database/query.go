@@ -87,7 +87,7 @@ func TotalEntries() int {
 
 	return total
 }
-func UnwatchedEntries() int {
+func CountUnwatched() int {
 	db := openDB()
 
 	rows := runQuery(db, "SELECT * FROM entries WHERE watched = 0")
@@ -103,7 +103,7 @@ func UnwatchedEntries() int {
 
 	return total
 }
-func QueryAll() []feed.Entry {
+func QueryUnwatched() []feed.Entry {
 	db := openDB()
 
 	rows := runQuery(db, "SELECT * FROM entries WHERE watched = 0")

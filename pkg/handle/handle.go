@@ -4,7 +4,7 @@ import (
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/pkg/argparse"
 	"github.com/pspiagicw/sinister/pkg/help"
-	"github.com/pspiagicw/sinister/pkg/tui"
+	"github.com/pspiagicw/sinister/pkg/manage"
 )
 
 func Handle(opts *argparse.Opts) {
@@ -26,11 +26,11 @@ func handleCmd(opts *argparse.Opts) {
 		"help": func(opts *argparse.Opts) {
 			help.HandleHelp(opts.Args[1:], opts.Version)
 		},
-		"status":   tui.Status,
-		"update":   tui.Update,
-		"download": tui.Download,
-		"mark":     tui.Mark,
-		"auto":     tui.Auto,
+		"status":   manage.Status,
+		"update":   manage.Update,
+		"download": manage.Download,
+		"mark":     manage.Mark,
+		"auto":     manage.Auto,
 	}
 
 	cmd := opts.Args[0]

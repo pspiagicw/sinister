@@ -1,4 +1,4 @@
-package tui
+package manage
 
 import (
 	"flag"
@@ -35,7 +35,7 @@ func Auto(opts *argparse.Opts) {
 	goreland.LogSuccess("Synching with feeds completed!")
 	goreland.LogInfo("Downloading videos...")
 
-	entries := database.QueryAll()
+	entries := database.QueryUnwatched()
 
 	entries = filterEntries(entries, opts)
 
