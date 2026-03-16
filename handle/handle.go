@@ -2,9 +2,9 @@ package handle
 
 import (
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/help"
-	"github.com/pspiagicw/sinister/pkg/manage"
+	"github.com/pspiagicw/sinister/argparse"
+	"github.com/pspiagicw/sinister/help"
+	"github.com/pspiagicw/sinister/manage"
 )
 
 func Handle(opts *argparse.Opts) {

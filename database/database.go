@@ -6,7 +6,7 @@ import (
 	"github.com/adrg/xdg"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/feed"
+	"github.com/pspiagicw/sinister/feed"
 )
 
 func UpdateWatched(entry *feed.Entry) {

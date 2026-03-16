@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/feed"
+	"github.com/pspiagicw/sinister/feed"
 )
 
 func QueryCreators() []string {

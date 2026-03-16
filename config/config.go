@@ -5,36 +5,21 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/help"
+	"github.com/pspiagicw/sinister/help"
 )
 
 type Config struct {
-	VideoFolder string          `toml:"videoFolder"`
-	URLS        []string        `toml:"urls"`
-	Feeds       map[string]Feed `toml:"feed"`
-	Quality     string          `toml:"quality"`
+	VideoFolder string   `toml:"videoFolder"`
+	URLS        []string `toml:"urls"`
+	Quality     string   `toml:"quality"`
 }
 type Feed struct {
 	URL  string   `toml:"url"`
 	Tags []string `toml:"tags"`
 }
 
-func (c Config) GetURLs() []string {
-	urls := make([]string, 0)
-	for _, url := range c.URLS {
-		urls = append(urls, url)
-	}
-
-	for _, feed := range c.Feeds {
-		urls = append(urls, feed.URL)
-	}
-
-	return urls
-}
-
-func ParseConfig(opts *argparse.Opts) *Config {
-	path := getConfigPath(opts)
+func ParseConfig(configPath string) *Config {
+	path := getConfigPath(configPath)
 
 	conf := readConfig(path)
 
@@ -74,10 +59,12 @@ func readConfig(path string) *Config {
 	}
 	return &conf
 }
-func getConfigPath(opts *argparse.Opts) string {
-	if opts.Config != "" {
-		return opts.Config
+func getConfigPath(configPath string) string {
+
+	if configPath != "" {
+		return configPath
 	}
+
 	path, err := xdg.SearchConfigFile("sinister/config.toml")
 	if err != nil {
 		help.HelpConfig()

@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/database"
-	"github.com/pspiagicw/sinister/pkg/feed"
-	"github.com/pspiagicw/sinister/pkg/help"
+	"github.com/pspiagicw/sinister/argparse"
+	"github.com/pspiagicw/sinister/database"
+	"github.com/pspiagicw/sinister/feed"
+	"github.com/pspiagicw/sinister/help"
 )
 
 func parseAutoOpts(opts *argparse.Opts) {

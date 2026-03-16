@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/toml v1.3.2
 	github.com/adrg/xdg v0.4.0
+	github.com/alecthomas/kong v1.14.0
 	github.com/briandowns/spinner v1.23.0
 	github.com/gosimple/slug v1.14.0
 	github.com/kkdai/youtube/v2 v2.10.1

@@ -4,9 +4,9 @@ import (
 	"flag"
 
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/database"
-	"github.com/pspiagicw/sinister/pkg/help"
+	"github.com/pspiagicw/sinister/argparse"
+	"github.com/pspiagicw/sinister/database"
+	"github.com/pspiagicw/sinister/help"
 )
 
 func parseBingeArgs(opts *argparse.Opts) {

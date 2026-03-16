@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/config"
-	"github.com/pspiagicw/sinister/pkg/database"
-	"github.com/pspiagicw/sinister/pkg/feed"
-	"github.com/pspiagicw/sinister/pkg/help"
+	"github.com/pspiagicw/sinister/argparse"
+	"github.com/pspiagicw/sinister/config"
+	"github.com/pspiagicw/sinister/database"
+	"github.com/pspiagicw/sinister/feed"
+	"github.com/pspiagicw/sinister/help"
 )
 
 func parseUpdateArgs(opts *argparse.Opts) {
@@ -26,7 +26,7 @@ func Update(opts *argparse.Opts) {
 func performUpdate(opts *argparse.Opts) {
 	conf := config.ParseConfig(opts)
 
-	for _, url := range conf.GetURLs() {
+	for _, url := range conf.URLS {
 		goreland.LogInfo("Fetching %s", url)
 		fetch(url)
 	}

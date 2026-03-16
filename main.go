@@ -1,13 +1,12 @@
 package main
 
 import (
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/handle"
+	"github.com/pspiagicw/sinister/argparse"
+	"github.com/pspiagicw/sinister/handle"
 )
 
 var VERSION string = "unversioned"
 
 func main() {
-	args := argparse.Parse(VERSION)
-	handle.Handle(args)
+	args := argparse.Run(VERSION)
 }

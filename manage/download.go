@@ -12,11 +12,11 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/kkdai/youtube/v2"
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/config"
-	"github.com/pspiagicw/sinister/pkg/database"
-	"github.com/pspiagicw/sinister/pkg/feed"
-	"github.com/pspiagicw/sinister/pkg/help"
+	"github.com/pspiagicw/sinister/argparse"
+	"github.com/pspiagicw/sinister/config"
+	"github.com/pspiagicw/sinister/database"
+	"github.com/pspiagicw/sinister/feed"
+	"github.com/pspiagicw/sinister/help"
 )
 
 func parseDownloadArgs(opts *argparse.Opts) {

@@ -1,25 +1,15 @@
 package manage
 
 import (
-	"flag"
 	"fmt"
 
-	"github.com/pspiagicw/sinister/pkg/argparse"
-	"github.com/pspiagicw/sinister/pkg/config"
-	"github.com/pspiagicw/sinister/pkg/database"
-	"github.com/pspiagicw/sinister/pkg/help"
+	"github.com/pspiagicw/sinister/config"
+	"github.com/pspiagicw/sinister/database"
 )
 
-func parseStatusArgs(opts *argparse.Opts) {
-	flag := flag.NewFlagSet("sinister status", flag.ExitOnError)
-	flag.Usage = help.HelpStatus
-	flag.Parse(opts.Args[1:])
-}
+func Status(configPath string) {
 
-func Status(opts *argparse.Opts) {
-
-	parseStatusArgs(opts)
-	conf := config.ParseConfig(opts)
+	conf := config.ParseConfig(configPath)
 
 	fmt.Println()
 	fmt.Println("SINISTER")

@@ -5,7 +5,7 @@ import (
 
 	"github.com/gosimple/slug"
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/pkg/feed"
+	"github.com/pspiagicw/sinister/feed"
 )
 
 func Add(entry *feed.Entry) {
