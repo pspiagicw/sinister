@@ -79,6 +79,14 @@ func (e *ExportCMD) Run(o *Opts) error {
 	return nil
 }
 
+type DownloadCMD struct {
+}
+
+func (d *DownloadCMD) Run(o *Opts) error {
+	manage.Download(o.Config)
+	return nil
+}
+
 type ListCMD struct {
 }
 
@@ -90,12 +98,13 @@ func (l *ListCMD) Run(o *Opts) error {
 var CLI struct {
 	Config string `help:"Alternate config file."`
 
-	Version VersionCMD `cmd:"" help:"Print version information."`
-	Status  StatusCMD  `cmd:"" help:"Print status of downloaded videos."`
-	Update  UpdateCMD  `cmd:"" help:"Update video database."`
-	Mark    MarkCMD    `cmd:"" help:"Mark video status."`
-	Export  ExportCMD  `cmd:"" help:"Export unwatched video URLs to urls.txt and mark them watched."`
-	List    ListCMD    `cmd:"" help:"List channels and video counts."`
+	Version  VersionCMD  `cmd:"" help:"Print version information."`
+	Status   StatusCMD   `cmd:"" help:"Print status of downloaded videos."`
+	Update   UpdateCMD   `cmd:"" help:"Update video database."`
+	Download DownloadCMD `cmd:"" help:"Download unwatched videos in highest available quality."`
+	Mark     MarkCMD     `cmd:"" help:"Mark video status."`
+	Export   ExportCMD   `cmd:"" help:"Export unwatched video URLs to urls.txt and mark them watched."`
+	List     ListCMD     `cmd:"" help:"List channels and video counts."`
 }
 
 func Run(version string) {
