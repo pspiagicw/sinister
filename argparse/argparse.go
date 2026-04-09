@@ -39,6 +39,14 @@ func (u *UpdateCMD) Run(o *Opts) error {
 type MarkCMD struct {
 }
 
+type ExportCMD struct {
+}
+
+func (e *ExportCMD) Run(o *Opts) error {
+	manage.Export()
+	return nil
+}
+
 var CLI struct {
 	Config string `help:"Alternate config file."`
 
@@ -46,6 +54,7 @@ var CLI struct {
 	Status  StatusCMD  `cmd:"" help:"Print status of downloaded videos."`
 	Update  UpdateCMD  `cmd:"" help:"Update video database."`
 	Mark    MarkCMD    `cmd:"" help:"Mark video status."`
+	Export  ExportCMD  `cmd:"" help:"Export unwatched video URLs to urls.txt and mark them watched."`
 }
 
 func Run(version string) {
