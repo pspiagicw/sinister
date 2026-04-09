@@ -56,6 +56,19 @@ func CountUnwatched() int {
 	defer closeDB(db)
 	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE watched = 0")
 }
+
+func CountEntriesByCreator(creator string) int {
+	db := openDB()
+	defer closeDB(db)
+	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE author = ?", creator)
+}
+
+func CountUnwatchedByCreator(creator string) int {
+	db := openDB()
+	defer closeDB(db)
+	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE author = ? AND watched = 0", creator)
+}
+
 func QueryUnwatched() []feed.Entry {
 	db := openDB()
 	defer closeDB(db)

@@ -21,10 +21,16 @@ func (v *VersionCMD) Run(o *Opts) error {
 }
 
 type StatusCMD struct {
+	JSON    bool   `name:"json" help:"Print status in JSON format."`
+	Creator string `name:"creator" help:"Show status for a single creator."`
 }
 
 func (s *StatusCMD) Run(o *Opts) error {
-	manage.Status(o.Config)
+	manage.Status(manage.StatusOptions{
+		ConfigPath: o.Config,
+		JSON:       s.JSON,
+		Creator:    s.Creator,
+	})
 	return nil
 }
 
