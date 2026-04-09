@@ -121,6 +121,18 @@ func (a *AddCMD) Run(o *Opts) error {
 	return nil
 }
 
+type CleanCMD struct {
+	DryRun bool `name:"dry-run" help:"Preview which 404 feeds would be removed."`
+}
+
+func (c *CleanCMD) Run(o *Opts) error {
+	manage.Clean(manage.CleanOptions{
+		ConfigPath: o.Config,
+		DryRun:     c.DryRun,
+	})
+	return nil
+}
+
 var CLI struct {
 	Config string `help:"Alternate config file."`
 
@@ -132,6 +144,7 @@ var CLI struct {
 	Export   ExportCMD   `cmd:"" help:"Export unwatched video URLs to urls.txt and mark them watched."`
 	List     ListCMD     `cmd:"" help:"List channels and video counts."`
 	Add      AddCMD      `cmd:"" help:"Add a channel feed URL to config from a YouTube video URL."`
+	Clean    CleanCMD    `cmd:"" help:"Remove RSS feed URLs from config that return 404."`
 }
 
 func Run(version string) {
