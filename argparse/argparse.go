@@ -9,34 +9,23 @@ import (
 
 type Opts struct {
 	Version string
-	// Args    []string
-	//
-	// // Alternate config file
-	Config string
-	//
-	// // Subcommand fields
-	// NoSpinner bool
-	//
-	// // Auto fields
-	// Days        int
-	// NoSync      bool
-	// MarkWatched bool
-	// Format      bool
+	Config  string
 }
 
 type VersionCMD struct {
 }
 
-func (v *VersionCMD) Run(o *Opts) {
-	fmt.Printf("%s version: '%s'\n", "sinister", o.Version)
+func (v *VersionCMD) Run(o *Opts) error {
+	fmt.Printf("sinister version: '%s'\n", o.Version)
+	return nil
 }
 
 type StatusCMD struct {
 }
 
-func (s *StatusCMD) Run(o *Opts) {
+func (s *StatusCMD) Run(o *Opts) error {
 	manage.Status(o.Config)
-
+	return nil
 }
 
 type UpdateCMD struct {
