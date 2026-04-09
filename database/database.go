@@ -9,8 +9,21 @@ import (
 	"github.com/pspiagicw/sinister/feed"
 )
 
+const (
+	createEntriesTableSQL = "CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY, author TEXT, title TEXT UNIQUE, published TEXT, link TEXT, watched INTEGER, slug TEXT UNIQUE)"
+)
+
+type scanner interface {
+	Scan(dest ...interface{}) error
+}
+
+type queryExecer interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
 func UpdateWatched(entry *feed.Entry) {
 	db := openDB()
+	defer closeDB(db)
 
 	_, err := db.Exec("UPDATE entries SET watched = 1 WHERE slug = ?", entry.Slug)
 
@@ -41,7 +54,7 @@ func getDBPath() string {
 }
 
 func ensureTableExists(db *sql.DB) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY, author TEXT, title TEXT UNIQUE, published TEXT, link TEXT, watched INTEGER, SLUG TEXT UNIQUE)")
+	_, err := db.Exec(createEntriesTableSQL)
 	if err != nil {
 		goreland.LogFatal("Error while creating table: %v", err)
 	}
@@ -58,6 +71,10 @@ func scanStrings(rows *sql.Rows) []string {
 		elements = append(elements, element)
 	}
 
+	if err := rows.Err(); err != nil {
+		goreland.LogFatal("Error while iterating rows: %v", err)
+	}
+
 	return elements
 }
 func runQuery(db *sql.DB, query string, args ...interface{}) *sql.Rows {
@@ -69,4 +86,39 @@ func runQuery(db *sql.DB, query string, args ...interface{}) *sql.Rows {
 
 	return rows
 
+}
+
+func closeDB(db *sql.DB) {
+	if err := db.Close(); err != nil {
+		goreland.LogError("Error while closing database: %v", err)
+	}
+}
+
+func closeRows(rows *sql.Rows) {
+	if err := rows.Close(); err != nil {
+		goreland.LogError("Error while closing rows: %v", err)
+	}
+}
+
+func scanEntry(s scanner) *feed.Entry {
+	entry := new(feed.Entry)
+	var id int
+
+	err := s.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug)
+	if err != nil {
+		goreland.LogFatal("Error while scanning: %v", err)
+	}
+
+	return entry
+}
+
+func countQuery(db *sql.DB, query string, args ...interface{}) int {
+	var total int
+
+	err := db.QueryRow(query, args...).Scan(&total)
+	if err != nil {
+		goreland.LogFatal("Error while counting query results: %v", err)
+	}
+
+	return total
 }
