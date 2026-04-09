@@ -7,7 +7,9 @@ import (
 	neturl "net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -43,7 +45,7 @@ func Download(opts DownloadOptions) {
 	failedCount := 0
 
 	for _, entry := range entries {
-		if err := downloadEntry(&client, conf.VideoFolder, entry); err != nil {
+		if err := downloadEntry(&client, conf.VideoFolder, conf.Quality, entry); err != nil {
 			failedCount++
 			goreland.LogError("Skipping %s: %v", entry.Title, err)
 			continue
@@ -103,7 +105,7 @@ func parsePublished(value string) (time.Time, bool) {
 	return t, true
 }
 
-func downloadEntry(client *youtube.Client, videoFolder string, entry feed.Entry) error {
+func downloadEntry(client *youtube.Client, videoFolder, quality string, entry feed.Entry) error {
 	videoID, err := getVideoID(entry.Link.URL)
 	if err != nil {
 		return err
@@ -114,7 +116,7 @@ func downloadEntry(client *youtube.Client, videoFolder string, entry feed.Entry)
 		return fmt.Errorf("error getting video metadata: %w", err)
 	}
 
-	format, err := getBestFormat(video)
+	format, err := getBestFormat(video, quality)
 	if err != nil {
 		return err
 	}
@@ -139,7 +141,7 @@ func downloadEntry(client *youtube.Client, videoFolder string, entry feed.Entry)
 	return nil
 }
 
-func getBestFormat(video *youtube.Video) (*youtube.Format, error) {
+func getBestFormat(video *youtube.Video, quality string) (*youtube.Format, error) {
 	muxedVideoFormats := youtube.FormatList{}
 	for _, format := range video.Formats {
 		if isMuxedVideoFormat(format) {
@@ -151,8 +153,29 @@ func getBestFormat(video *youtube.Video) (*youtube.Format, error) {
 		return nil, fmt.Errorf("no downloadable video+audio format found")
 	}
 
-	muxedVideoFormats.Sort()
-	best := muxedVideoFormats[len(muxedVideoFormats)-1]
+	targetHeight := parseTargetHeight(quality)
+	if targetHeight == 0 {
+		targetHeight = 1080
+	}
+
+	candidates := make([]youtube.Format, 0, len(muxedVideoFormats))
+	for _, format := range muxedVideoFormats {
+		if format.Height >= targetHeight {
+			candidates = append(candidates, format)
+		}
+	}
+
+	if len(candidates) == 0 {
+		candidates = append(candidates, muxedVideoFormats...)
+	}
+
+	best := candidates[0]
+	for i := 1; i < len(candidates); i++ {
+		if betterFormat(candidates[i], best) {
+			best = candidates[i]
+		}
+	}
+
 	return &best, nil
 }
 
@@ -167,6 +190,35 @@ func isMuxedVideoFormat(format youtube.Format) bool {
 	}
 
 	return strings.HasPrefix(parsed, "video/")
+}
+
+func betterFormat(a, b youtube.Format) bool {
+	if a.Height != b.Height {
+		return a.Height > b.Height
+	}
+	if a.Bitrate != b.Bitrate {
+		return a.Bitrate > b.Bitrate
+	}
+	return a.AudioChannels > b.AudioChannels
+}
+
+func parseTargetHeight(quality string) int {
+	quality = strings.TrimSpace(strings.ToLower(quality))
+	if quality == "" {
+		return 0
+	}
+
+	re := regexp.MustCompile(`\d+`)
+	matches := re.FindString(quality)
+	if matches == "" {
+		return 0
+	}
+
+	value, err := strconv.Atoi(matches)
+	if err != nil {
+		return 0
+	}
+	return value
 }
 
 func getOutputPath(videoFolder string, entry feed.Entry, format *youtube.Format) string {
