@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mime"
+	neturl "net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -121,9 +122,29 @@ func extensionFromMimeType(mimeType string) string {
 }
 
 func getVideoID(url string) (string, error) {
-	id, found := strings.CutPrefix(url, "https://www.youtube.com/watch?v=")
-	if !found || strings.TrimSpace(id) == "" {
-		return "", fmt.Errorf("invalid YouTube URL: %s", url)
+	parsed, err := neturl.Parse(url)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL: %w", err)
 	}
-	return id, nil
+
+	host := strings.ToLower(parsed.Host)
+	switch host {
+	case "www.youtube.com", "youtube.com", "m.youtube.com":
+		if id := strings.TrimSpace(parsed.Query().Get("v")); id != "" {
+			return id, nil
+		}
+
+		pathParts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+		if len(pathParts) == 2 && pathParts[0] == "shorts" {
+			if id := strings.TrimSpace(pathParts[1]); id != "" {
+				return id, nil
+			}
+		}
+	case "youtu.be", "www.youtu.be":
+		if id := strings.TrimSpace(strings.Trim(parsed.Path, "/")); id != "" {
+			return id, nil
+		}
+	}
+
+	return "", fmt.Errorf("unsupported YouTube URL: %s", url)
 }
