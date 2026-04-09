@@ -1,10 +1,18 @@
 package database
 
 import (
+	"database/sql"
+
 	"github.com/gosimple/slug"
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/feed"
 )
+
+type CreatorStat struct {
+	Name      string
+	Total     int
+	Unwatched int
+}
 
 func QueryCreators() []string {
 	db := openDB()
@@ -98,4 +106,37 @@ func QueryUnwatched() []feed.Entry {
 	}
 
 	return entries
+}
+
+func QueryCreatorStats() []CreatorStat {
+	db := openDB()
+	defer closeDB(db)
+
+	rows := runQuery(
+		db,
+		"SELECT author, COUNT(*) AS total, SUM(CASE WHEN watched = 0 THEN 1 ELSE 0 END) AS unwatched FROM entries GROUP BY author ORDER BY total DESC, author ASC",
+	)
+	defer closeRows(rows)
+
+	stats := []CreatorStat{}
+	for rows.Next() {
+		stat := CreatorStat{}
+		var unwatched sql.NullInt64
+
+		if err := rows.Scan(&stat.Name, &stat.Total, &unwatched); err != nil {
+			goreland.LogFatal("Error while scanning creator stats: %v", err)
+		}
+
+		if unwatched.Valid {
+			stat.Unwatched = int(unwatched.Int64)
+		}
+
+		stats = append(stats, stat)
+	}
+
+	if err := rows.Err(); err != nil {
+		goreland.LogFatal("Error while iterating creator stats: %v", err)
+	}
+
+	return stats
 }

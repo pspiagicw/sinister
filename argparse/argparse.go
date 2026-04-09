@@ -79,6 +79,14 @@ func (e *ExportCMD) Run(o *Opts) error {
 	return nil
 }
 
+type ListCMD struct {
+}
+
+func (l *ListCMD) Run(o *Opts) error {
+	manage.List()
+	return nil
+}
+
 var CLI struct {
 	Config string `help:"Alternate config file."`
 
@@ -87,6 +95,7 @@ var CLI struct {
 	Update  UpdateCMD  `cmd:"" help:"Update video database."`
 	Mark    MarkCMD    `cmd:"" help:"Mark video status."`
 	Export  ExportCMD  `cmd:"" help:"Export unwatched video URLs to urls.txt and mark them watched."`
+	List    ListCMD    `cmd:"" help:"List channels and video counts."`
 }
 
 func Run(version string) {
