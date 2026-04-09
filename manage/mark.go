@@ -9,14 +9,20 @@ import (
 )
 
 type MarkOptions struct {
-	Slugs        []string
-	URLs         []string
-	Creator      string
-	AllUnwatched bool
-	DryRun       bool
+	Slugs            []string
+	URLs             []string
+	Creator          string
+	AllUnwatched     bool
+	MarkAllUnwatched bool
+	DryRun           bool
 }
 
 func Mark(opts MarkOptions) {
+	if opts.MarkAllUnwatched {
+		markAllVideosUnwatched(opts.DryRun)
+		return
+	}
+
 	if !hasSelectionFlags(opts) {
 		runInteractiveMark(opts.DryRun)
 		return
@@ -35,6 +41,17 @@ func Mark(opts MarkOptions) {
 
 func hasSelectionFlags(opts MarkOptions) bool {
 	return len(opts.Slugs) > 0 || len(opts.URLs) > 0 || opts.Creator != "" || opts.AllUnwatched
+}
+
+func markAllVideosUnwatched(dryRun bool) {
+	if dryRun {
+		total := database.TotalEntries()
+		goreland.LogSuccess("[dry-run] %d videos would be marked as unwatched", total)
+		return
+	}
+
+	updated := database.MarkAllUnwatched()
+	goreland.LogSuccess("Marked %d videos as unwatched", updated)
 }
 
 func runInteractiveMark(dryRun bool) {

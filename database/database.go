@@ -32,6 +32,23 @@ func UpdateWatched(entry *feed.Entry) {
 	}
 }
 
+func MarkAllUnwatched() int {
+	db := openDB()
+	defer closeDB(db)
+
+	result, err := db.Exec("UPDATE entries SET watched = 0")
+	if err != nil {
+		goreland.LogFatal("Error while resetting watched status: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		goreland.LogFatal("Error while checking updated rows: %v", err)
+	}
+
+	return int(rowsAffected)
+}
+
 func openDB() *sql.DB {
 	dbPath := getDBPath()
 

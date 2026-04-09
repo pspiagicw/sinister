@@ -53,20 +53,22 @@ func (u *UpdateCMD) Run(o *Opts) error {
 }
 
 type MarkCMD struct {
-	Slug         []string `name:"slug" help:"Mark entries by slug."`
-	URL          []string `name:"url" help:"Mark entries by video URL."`
-	Creator      string   `name:"creator" help:"Mark entries for this creator."`
-	AllUnwatched bool     `name:"all-unwatched" help:"Mark all unwatched entries."`
-	DryRun       bool     `name:"dry-run" help:"Show what would be marked without updating the database."`
+	Slug             []string `name:"slug" help:"Mark entries by slug."`
+	URL              []string `name:"url" help:"Mark entries by video URL."`
+	Creator          string   `name:"creator" help:"Mark entries for this creator."`
+	AllUnwatched     bool     `name:"all-unwatched" help:"Mark all unwatched entries."`
+	MarkAllUnwatched bool     `name:"mark-all-unwatched" help:"Mark every video in the database as unwatched."`
+	DryRun           bool     `name:"dry-run" help:"Show what would be marked without updating the database."`
 }
 
 func (m *MarkCMD) Run(o *Opts) error {
 	manage.Mark(manage.MarkOptions{
-		Slugs:        m.Slug,
-		URLs:         m.URL,
-		Creator:      m.Creator,
-		AllUnwatched: m.AllUnwatched,
-		DryRun:       m.DryRun,
+		Slugs:            m.Slug,
+		URLs:             m.URL,
+		Creator:          m.Creator,
+		AllUnwatched:     m.AllUnwatched,
+		MarkAllUnwatched: m.MarkAllUnwatched,
+		DryRun:           m.DryRun,
 	})
 	return nil
 }
