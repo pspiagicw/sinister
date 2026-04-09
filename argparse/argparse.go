@@ -35,10 +35,20 @@ func (s *StatusCMD) Run(o *Opts) error {
 }
 
 type UpdateCMD struct {
+	URL    []string `name:"url" help:"Fetch these RSS feeds instead of config URLs."`
+	Limit  int      `name:"limit" default:"0" help:"Process at most N feed entries per URL (0 = all)."`
+	DryRun bool     `name:"dry-run" help:"Show what would be inserted without writing to the database."`
+	JSON   bool     `name:"json" help:"Print update summary in JSON format."`
 }
 
 func (u *UpdateCMD) Run(o *Opts) error {
-	manage.Update(o.Config)
+	manage.Update(manage.UpdateOptions{
+		ConfigPath: o.Config,
+		URLs:       u.URL,
+		Limit:      u.Limit,
+		DryRun:     u.DryRun,
+		JSON:       u.JSON,
+	})
 	return nil
 }
 

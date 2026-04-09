@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/gosimple/slug"
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/feed"
 )
@@ -67,6 +68,14 @@ func CountUnwatchedByCreator(creator string) int {
 	db := openDB()
 	defer closeDB(db)
 	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE author = ? AND watched = 0", creator)
+}
+
+func ExistsByTitle(title string) bool {
+	db := openDB()
+	defer closeDB(db)
+
+	videoSlug := slug.Make(title)
+	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE slug = ?", videoSlug) > 0
 }
 
 func QueryUnwatched() []feed.Entry {
