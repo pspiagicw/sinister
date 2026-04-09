@@ -3,6 +3,7 @@ package manage
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,6 +26,7 @@ type UpdateOptions struct {
 
 type UpdateSummary struct {
 	FeedsProcessed int  `json:"feedsProcessed"`
+	FeedsSkipped   int  `json:"feedsSkipped"`
 	EntriesSeen    int  `json:"entriesSeen"`
 	Inserted       int  `json:"inserted"`
 	Skipped        int  `json:"skipped"`
@@ -39,7 +41,12 @@ func Update(opts UpdateOptions) {
 		goreland.LogInfo("Fetching %s", url)
 		summary.FeedsProcessed++
 
-		f := fetchFeed(url)
+		f, err := fetchFeed(url)
+		if err != nil {
+			summary.FeedsSkipped++
+			goreland.LogError("Skipping feed %s: %v", url, err)
+			continue
+		}
 		entries := applyLimit(f.Entries, opts.Limit)
 
 		for _, entry := range entries {
@@ -97,8 +104,9 @@ func printUpdateSummary(summary UpdateSummary, asJSON bool) {
 	}
 
 	goreland.LogSuccess(
-		"Update complete: feeds=%d entries=%d inserted=%d skipped=%d dry-run=%t",
+		"Update complete: feeds=%d skipped-feeds=%d entries=%d inserted=%d skipped=%d dry-run=%t",
 		summary.FeedsProcessed,
+		summary.FeedsSkipped,
 		summary.EntriesSeen,
 		summary.Inserted,
 		summary.Skipped,
@@ -106,36 +114,39 @@ func printUpdateSummary(summary UpdateSummary, asJSON bool) {
 	)
 }
 
-func fetchFeed(url string) *feed.Feed {
-	body := getContents(url)
+func fetchFeed(url string) (*feed.Feed, error) {
+	body, err := getContents(url)
+	if err != nil {
+		return nil, err
+	}
 
 	var f feed.Feed
 	if err := xml.Unmarshal(body, &f); err != nil {
-		goreland.LogFatal("Error while parsing feed: %v", err)
+		return nil, fmt.Errorf("error while parsing feed: %w", err)
 	}
 
-	return &f
+	return &f, nil
 }
 
-func getContents(url string) []byte {
+func getContents(url string) ([]byte, error) {
 	client := http.Client{Timeout: 30 * time.Second}
 
 	resp, err := client.Get(url)
 	if err != nil {
-		goreland.LogFatal("Error while connecting: %v", err)
+		return nil, fmt.Errorf("error while connecting: %w", err)
 	}
 	defer closeResponse(resp)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		goreland.LogFatal("Error while fetching feed: %s", resp.Status)
+		return nil, errors.New(resp.Status)
 	}
 
 	contents, err := io.ReadAll(resp.Body)
 	if err != nil {
-		goreland.LogFatal("Error reading response body: %v", err)
+		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
-	return contents
+	return contents, nil
 }
 
 func closeResponse(resp *http.Response) {
