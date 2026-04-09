@@ -1,90 +1,68 @@
 package manage
 
 import (
-// "encoding/xml"
-// "flag"
-// "io"
-// "net/http"
-//
-// "github.com/pspiagicw/goreland"
-// "github.com/pspiagicw/sinister/argparse"
-// "github.com/pspiagicw/sinister/config"
-// "github.com/pspiagicw/sinister/database"
-// "github.com/pspiagicw/sinister/feed"
+	"encoding/xml"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/pspiagicw/goreland"
+	"github.com/pspiagicw/sinister/config"
+	"github.com/pspiagicw/sinister/database"
+	"github.com/pspiagicw/sinister/feed"
 )
 
-// func parseUpdateArgs(opts *argparse.Opts) {
-// 	flag := flag.NewFlagSet("sinister update", flag.ExitOnError)
-// 	flag.Parse(opts.Args[1:])
-// }
-// func Update(opts *argparse.Opts) {
-// 	parseUpdateArgs(opts)
-// 	performUpdate(opts)
-// }
-// func performUpdate(opts *argparse.Opts) {
-// 	conf := config.ParseConfig(opts)
-//
-// 	for _, url := range conf.URLS {
-// 		goreland.LogInfo("Fetching %s", url)
-// 		fetch(url)
-// 	}
-//
-// }
-//
-// func fetch(url string) {
-//
-// 	contents := getContents(url)
-//
-// 	feed := decodeFeed(contents)
-//
-// 	for _, entry := range feed.Entries {
-// 		database.Add(&entry)
-// 	}
-//
-// }
-// func decodeFeed(contents []byte) *feed.Feed {
-// 	var feed feed.Feed
-//
-// 	err := xml.Unmarshal(contents, &feed)
-// 	if err != nil {
-// 		goreland.LogFatal("Error while connecting: %v", err)
-// 	}
-// 	return &feed
-// }
-//
-// func getContents(url string) []byte {
-//
-// 	resp := makeRequest(url)
-// 	contents := readResponse(resp)
-//
-// 	return contents
-// }
-// func makeRequest(url string) *http.Response {
-// 	resp, err := http.Get(url)
-// 	if err != nil {
-// 		goreland.LogFatal("Error while connecting: %v", err)
-// 	}
-// 	return resp
-// }
-// func readResponse(resp *http.Response) []byte {
-//
-// 	contents := readBody(resp)
-//
-// 	closeResponse(resp)
-//
-// 	return contents
-// }
-// func readBody(resp *http.Response) []byte {
-// 	contents, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		goreland.LogFatal("Error reading response body: %v", err)
-// 	}
-//
-// 	return contents
-// }
-// func closeResponse(resp *http.Response) {
-// 	err := resp.Body.Close()
-// 	if err != nil {
-// 		goreland.LogError("Error closing response body: %v", err)
-// 	}
-// }
+func Update(configPath string) {
+	conf := config.ParseConfig(configPath)
+
+	for _, url := range conf.URLS {
+		goreland.LogInfo("Fetching %s", url)
+
+		f := fetchFeed(url)
+		for _, entry := range f.Entries {
+			// Some feeds only define author at the feed level.
+			if entry.Author.Name == "" {
+				entry.Author = f.Author
+			}
+			database.Add(&entry)
+		}
+	}
+}
+
+func fetchFeed(url string) *feed.Feed {
+	body := getContents(url)
+
+	var f feed.Feed
+	if err := xml.Unmarshal(body, &f); err != nil {
+		goreland.LogFatal("Error while parsing feed: %v", err)
+	}
+
+	return &f
+}
+
+func getContents(url string) []byte {
+	client := http.Client{Timeout: 30 * time.Second}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		goreland.LogFatal("Error while connecting: %v", err)
+	}
+	defer closeResponse(resp)
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		goreland.LogFatal("Error while fetching feed: %s", resp.Status)
+	}
+
+	contents, err := io.ReadAll(resp.Body)
+	if err != nil {
+		goreland.LogFatal("Error reading response body: %v", err)
+	}
+
+	return contents
+}
+
+func closeResponse(resp *http.Response) {
+	if err := resp.Body.Close(); err != nil {
+		goreland.LogError("Error closing response body: %v", err)
+	}
+}

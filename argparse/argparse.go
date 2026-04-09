@@ -31,6 +31,11 @@ func (s *StatusCMD) Run(o *Opts) error {
 type UpdateCMD struct {
 }
 
+func (u *UpdateCMD) Run(o *Opts) error {
+	manage.Update(o.Config)
+	return nil
+}
+
 type MarkCMD struct {
 }
 
