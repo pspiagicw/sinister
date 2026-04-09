@@ -67,7 +67,6 @@ func getConfigPath(configPath string) string {
 
 	path, err := xdg.SearchConfigFile("sinister/config.toml")
 	if err != nil {
-		help.HelpConfig()
 		goreland.LogFatal("Error while searching for config file: %v", err)
 	}
 	return path
