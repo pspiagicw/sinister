@@ -133,6 +133,38 @@ func (c *CleanCMD) Run(o *Opts) error {
 	return nil
 }
 
+type SyncCMD struct {
+	URL       []string `name:"url" help:"Fetch these RSS feeds instead of config URLs."`
+	Limit     int      `name:"limit" default:"0" help:"Process at most N feed entries per URL (0 = all)."`
+	SinceDays int      `name:"since-days" default:"0" help:"Only process videos published in the last N days (0 = no filter)."`
+	Retries   int      `name:"retries" default:"2" help:"Retry failed feed fetches this many times."`
+	Timeout   int      `name:"timeout" default:"30" help:"HTTP timeout in seconds for each feed request."`
+	DryRun    bool     `name:"dry-run" help:"Run update in dry-run mode (download will use existing unwatched data)."`
+	JSON      bool     `name:"json" help:"Print update summary in JSON format."`
+	Days      int      `name:"days" default:"0" help:"Download only videos from the last N days (0 = no filter)."`
+	Videos    int      `name:"videos" default:"0" help:"Download only the latest N unwatched videos (0 = no limit)."`
+}
+
+func (s *SyncCMD) Run(o *Opts) error {
+	manage.Sync(manage.SyncOptions{
+		ConfigPath: o.Config,
+		Update: manage.UpdateOptions{
+			URLs:      s.URL,
+			Limit:     s.Limit,
+			SinceDays: s.SinceDays,
+			Retries:   s.Retries,
+			Timeout:   s.Timeout,
+			DryRun:    s.DryRun,
+			JSON:      s.JSON,
+		},
+		Download: manage.DownloadOptions{
+			Days:   s.Days,
+			Videos: s.Videos,
+		},
+	})
+	return nil
+}
+
 var CLI struct {
 	Config string `help:"Alternate config file."`
 
@@ -145,6 +177,7 @@ var CLI struct {
 	List     ListCMD     `cmd:"" help:"List channels and video counts."`
 	Add      AddCMD      `cmd:"" help:"Add a channel feed URL to config from a YouTube video URL."`
 	Clean    CleanCMD    `cmd:"" help:"Remove RSS feed URLs from config that return 404."`
+	Sync     SyncCMD     `cmd:"" help:"Run update and then download in one command."`
 }
 
 func Run(version string) {
