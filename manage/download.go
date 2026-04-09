@@ -20,6 +20,8 @@ import (
 	"github.com/pspiagicw/sinister/feed"
 )
 
+const maxDownloadDuration = time.Hour
+
 type DownloadOptions struct {
 	ConfigPath string
 	Days       int
@@ -114,6 +116,9 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 	video, err := client.GetVideo(videoID)
 	if err != nil {
 		return fmt.Errorf("error getting video metadata: %w", err)
+	}
+	if video.Duration > maxDownloadDuration {
+		return fmt.Errorf("video duration %s exceeds 1h limit", video.Duration.Round(time.Second))
 	}
 
 	format, err := getBestFormat(video, quality)
