@@ -109,6 +109,18 @@ func (l *ListCMD) Run(o *Opts) error {
 	return nil
 }
 
+type AddCMD struct {
+	VideoURL string `arg:"" name:"video-url" help:"Any YouTube video URL."`
+}
+
+func (a *AddCMD) Run(o *Opts) error {
+	manage.Add(manage.AddOptions{
+		ConfigPath: o.Config,
+		VideoURL:   a.VideoURL,
+	})
+	return nil
+}
+
 var CLI struct {
 	Config string `help:"Alternate config file."`
 
@@ -119,11 +131,15 @@ var CLI struct {
 	Mark     MarkCMD     `cmd:"" help:"Mark video status."`
 	Export   ExportCMD   `cmd:"" help:"Export unwatched video URLs to urls.txt and mark them watched."`
 	List     ListCMD     `cmd:"" help:"List channels and video counts."`
+	Add      AddCMD      `cmd:"" help:"Add a channel feed URL to config from a YouTube video URL."`
 }
 
 func Run(version string) {
 	ctx := kong.Parse(&CLI)
-	err := ctx.Run(&Opts{Version: version})
+	err := ctx.Run(&Opts{
+		Version: version,
+		Config:  CLI.Config,
+	})
 
 	ctx.FatalIfErrorf(err)
 }

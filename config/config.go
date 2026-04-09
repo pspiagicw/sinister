@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
 	"github.com/mitchellh/go-homedir"
@@ -18,7 +20,7 @@ type Feed struct {
 }
 
 func ParseConfig(configPath string) *Config {
-	path := getConfigPath(configPath)
+	path := ResolveConfigPath(configPath)
 
 	conf := readConfig(path)
 
@@ -55,8 +57,7 @@ func readConfig(path string) *Config {
 	}
 	return &conf
 }
-func getConfigPath(configPath string) string {
-
+func ResolveConfigPath(configPath string) string {
 	if configPath != "" {
 		return configPath
 	}
@@ -66,4 +67,22 @@ func getConfigPath(configPath string) string {
 		goreland.LogFatal("Error while searching for config file: %v", err)
 	}
 	return path
+}
+
+func ReadConfigForUpdate(configPath string) (*Config, string) {
+	path := ResolveConfigPath(configPath)
+	conf := readConfig(path)
+	return conf, path
+}
+
+func WriteConfig(path string, conf *Config) {
+	file, err := os.Create(path)
+	if err != nil {
+		goreland.LogFatal("Error while writing config file: %v", err)
+	}
+	defer file.Close()
+
+	if err := toml.NewEncoder(file).Encode(conf); err != nil {
+		goreland.LogFatal("Error while encoding config file: %v", err)
+	}
 }
