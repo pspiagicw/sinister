@@ -86,14 +86,33 @@ func downloadEntry(client *youtube.Client, videoFolder string, entry feed.Entry)
 }
 
 func getBestFormat(video *youtube.Video) (*youtube.Format, error) {
-	formats := video.Formats.WithAudioChannels()
-	if len(formats) == 0 {
-		return nil, fmt.Errorf("no downloadable format with audio found")
+	muxedVideoFormats := youtube.FormatList{}
+	for _, format := range video.Formats {
+		if isMuxedVideoFormat(format) {
+			muxedVideoFormats = append(muxedVideoFormats, format)
+		}
 	}
 
-	formats.Sort()
-	best := formats[len(formats)-1]
+	if len(muxedVideoFormats) == 0 {
+		return nil, fmt.Errorf("no downloadable video+audio format found")
+	}
+
+	muxedVideoFormats.Sort()
+	best := muxedVideoFormats[len(muxedVideoFormats)-1]
 	return &best, nil
+}
+
+func isMuxedVideoFormat(format youtube.Format) bool {
+	if format.AudioChannels == 0 {
+		return false
+	}
+
+	parsed, _, err := mime.ParseMediaType(format.MimeType)
+	if err != nil {
+		return false
+	}
+
+	return strings.HasPrefix(parsed, "video/")
 }
 
 func getOutputPath(videoFolder string, entry feed.Entry, format *youtube.Format) string {
