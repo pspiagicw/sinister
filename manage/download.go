@@ -7,7 +7,9 @@ import (
 	neturl "net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/kkdai/youtube/v2"
 	"github.com/pspiagicw/goreland"
@@ -16,12 +18,19 @@ import (
 	"github.com/pspiagicw/sinister/feed"
 )
 
-func Download(configPath string) {
-	conf := config.ParseConfig(configPath)
+type DownloadOptions struct {
+	ConfigPath string
+	Days       int
+	Videos     int
+}
+
+func Download(opts DownloadOptions) {
+	conf := config.ParseConfig(opts.ConfigPath)
 	entries := database.QueryUnwatched()
+	entries = filterDownloadEntries(entries, opts)
 
 	if len(entries) == 0 {
-		goreland.LogInfo("No unwatched videos to download")
+		goreland.LogInfo("No unwatched videos matched the requested filters")
 		return
 	}
 
@@ -47,6 +56,51 @@ func Download(configPath string) {
 	}
 
 	goreland.LogSuccess("Download complete. success=%d failed=%d", successCount, failedCount)
+}
+
+func filterDownloadEntries(entries []feed.Entry, opts DownloadOptions) []feed.Entry {
+	sort.SliceStable(entries, func(i, j int) bool {
+		ti, okI := parsePublished(entries[i].Published)
+		tj, okJ := parsePublished(entries[j].Published)
+
+		if okI && okJ {
+			return ti.After(tj)
+		}
+		if okI {
+			return true
+		}
+		if okJ {
+			return false
+		}
+		return false
+	})
+
+	filtered := entries
+	if opts.Days > 0 {
+		cutoff := time.Now().AddDate(0, 0, -opts.Days)
+		tmp := make([]feed.Entry, 0, len(filtered))
+		for _, entry := range filtered {
+			t, ok := parsePublished(entry.Published)
+			if ok && t.After(cutoff) {
+				tmp = append(tmp, entry)
+			}
+		}
+		filtered = tmp
+	}
+
+	if opts.Videos > 0 && len(filtered) > opts.Videos {
+		filtered = filtered[:opts.Videos]
+	}
+
+	return filtered
+}
+
+func parsePublished(value string) (time.Time, bool) {
+	t, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return t, true
 }
 
 func downloadEntry(client *youtube.Client, videoFolder string, entry feed.Entry) error {

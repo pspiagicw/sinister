@@ -82,10 +82,16 @@ func (e *ExportCMD) Run(o *Opts) error {
 }
 
 type DownloadCMD struct {
+	Days   int `name:"days" default:"0" help:"Download only videos from the last N days (0 = no filter)."`
+	Videos int `name:"videos" default:"0" help:"Download only the latest N unwatched videos (0 = no limit)."`
 }
 
 func (d *DownloadCMD) Run(o *Opts) error {
-	manage.Download(o.Config)
+	manage.Download(manage.DownloadOptions{
+		ConfigPath: o.Config,
+		Days:       d.Days,
+		Videos:     d.Videos,
+	})
 	return nil
 }
 
