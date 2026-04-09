@@ -108,6 +108,10 @@ func parsePublished(value string) (time.Time, bool) {
 }
 
 func downloadEntry(client *youtube.Client, videoFolder, quality string, entry feed.Entry) error {
+	if isShortURL(entry.Link.URL) {
+		return fmt.Errorf("shorts are skipped")
+	}
+
 	videoID, err := getVideoID(entry.Link.URL)
 	if err != nil {
 		return err
@@ -147,31 +151,31 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 }
 
 func getBestFormat(video *youtube.Video, quality string) (*youtube.Format, error) {
-	muxedVideoFormats := youtube.FormatList{}
+	videoFormats := youtube.FormatList{}
 	for _, format := range video.Formats {
 		if isMuxedVideoFormat(format) {
-			muxedVideoFormats = append(muxedVideoFormats, format)
+			videoFormats = append(videoFormats, format)
 		}
 	}
 
-	if len(muxedVideoFormats) == 0 {
-		return nil, fmt.Errorf("no downloadable video+audio format found")
+	if len(videoFormats) == 0 {
+		return nil, fmt.Errorf("no downloadable audio+video format found")
 	}
 
 	targetHeight := parseTargetHeight(quality)
-	if targetHeight == 0 {
+	if targetHeight < 1080 {
 		targetHeight = 1080
 	}
 
-	candidates := make([]youtube.Format, 0, len(muxedVideoFormats))
-	for _, format := range muxedVideoFormats {
+	candidates := make([]youtube.Format, 0, len(videoFormats))
+	for _, format := range videoFormats {
 		if format.Height >= targetHeight {
 			candidates = append(candidates, format)
 		}
 	}
 
 	if len(candidates) == 0 {
-		candidates = append(candidates, muxedVideoFormats...)
+		candidates = append(candidates, videoFormats...)
 	}
 
 	best := candidates[0]
@@ -195,6 +199,20 @@ func isMuxedVideoFormat(format youtube.Format) bool {
 	}
 
 	return strings.HasPrefix(parsed, "video/")
+}
+
+func isShortURL(rawURL string) bool {
+	parsed, err := neturl.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+
+	host := strings.ToLower(parsed.Host)
+	if host != "www.youtube.com" && host != "youtube.com" && host != "m.youtube.com" {
+		return false
+	}
+
+	return strings.HasPrefix(strings.ToLower(parsed.Path), "/shorts/")
 }
 
 func betterFormat(a, b youtube.Format) bool {
