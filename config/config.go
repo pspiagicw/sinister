@@ -5,7 +5,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pspiagicw/goreland"
-	"github.com/pspiagicw/sinister/help"
+	"github.com/pspiagicw/sinister/utils"
 )
 
 type Config struct {
@@ -38,15 +38,15 @@ func sanitizeConfig(conf *Config) {
 }
 func checkConfig(conf *Config) {
 	if conf.VideoFolder == "" {
-		help.HelpConfig()
+		utils.HelpConfig()
 		goreland.LogFatal("Video folder not set in config file")
 	}
 	if len(conf.URLS) == 0 {
-		help.HelpConfig()
+		utils.HelpConfig()
 		goreland.LogFatal("No URLs set in config file")
 	}
 	if conf.Quality == "" {
-		help.HelpConfig()
+		utils.HelpConfig()
 		goreland.LogFatal("Quality not set in config file")
 	}
 }
