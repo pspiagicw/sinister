@@ -20,6 +20,9 @@ type UpdateOptions struct {
 	ConfigPath string
 	URLs       []string
 	Limit      int
+	SinceDays  int
+	Retries    int
+	Timeout    int
 	DryRun     bool
 	JSON       bool
 }
@@ -28,6 +31,7 @@ type UpdateSummary struct {
 	FeedsProcessed int  `json:"feedsProcessed"`
 	FeedsSkipped   int  `json:"feedsSkipped"`
 	EntriesSeen    int  `json:"entriesSeen"`
+	FilteredOut    int  `json:"filteredOut"`
 	Inserted       int  `json:"inserted"`
 	Skipped        int  `json:"skipped"`
 	DryRun         bool `json:"dryRun"`
@@ -41,7 +45,7 @@ func Update(opts UpdateOptions) {
 		goreland.LogInfo("Fetching %s", url)
 		summary.FeedsProcessed++
 
-		f, err := fetchFeed(url)
+		f, err := fetchFeedWithRetry(url, opts)
 		if err != nil {
 			summary.FeedsSkipped++
 			goreland.LogError("Skipping feed %s: %v", url, err)
@@ -52,6 +56,11 @@ func Update(opts UpdateOptions) {
 		for _, entry := range entries {
 			if entry.Author.Name == "" {
 				entry.Author = f.Author
+			}
+
+			if !withinSinceDays(entry.Published, opts.SinceDays) {
+				summary.FilteredOut++
+				continue
 			}
 
 			summary.EntriesSeen++
@@ -104,18 +113,42 @@ func printUpdateSummary(summary UpdateSummary, asJSON bool) {
 	}
 
 	goreland.LogSuccess(
-		"Update complete: feeds=%d skipped-feeds=%d entries=%d inserted=%d skipped=%d dry-run=%t",
+		"Update complete: feeds=%d skipped-feeds=%d entries=%d filtered=%d inserted=%d skipped=%d dry-run=%t",
 		summary.FeedsProcessed,
 		summary.FeedsSkipped,
 		summary.EntriesSeen,
+		summary.FilteredOut,
 		summary.Inserted,
 		summary.Skipped,
 		summary.DryRun,
 	)
 }
 
-func fetchFeed(url string) (*feed.Feed, error) {
-	body, err := getContents(url)
+func fetchFeedWithRetry(url string, opts UpdateOptions) (*feed.Feed, error) {
+	attempts := opts.Retries + 1
+	if attempts < 1 {
+		attempts = 1
+	}
+
+	var lastErr error
+	for attempt := 1; attempt <= attempts; attempt++ {
+		f, err := fetchFeed(url, opts.Timeout)
+		if err == nil {
+			return f, nil
+		}
+
+		lastErr = err
+		if attempt < attempts {
+			goreland.LogError("Fetch failed for %s (attempt %d/%d): %v", url, attempt, attempts, err)
+			time.Sleep(time.Duration(attempt) * time.Second)
+		}
+	}
+
+	return nil, lastErr
+}
+
+func fetchFeed(url string, timeoutSec int) (*feed.Feed, error) {
+	body, err := getContents(url, timeoutSec)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +161,12 @@ func fetchFeed(url string) (*feed.Feed, error) {
 	return &f, nil
 }
 
-func getContents(url string) ([]byte, error) {
-	client := http.Client{Timeout: 30 * time.Second}
+func getContents(url string, timeoutSec int) ([]byte, error) {
+	timeout := 30 * time.Second
+	if timeoutSec > 0 {
+		timeout = time.Duration(timeoutSec) * time.Second
+	}
+	client := http.Client{Timeout: timeout}
 
 	resp, err := client.Get(url)
 	if err != nil {
@@ -147,6 +184,20 @@ func getContents(url string) ([]byte, error) {
 	}
 
 	return contents, nil
+}
+
+func withinSinceDays(published string, sinceDays int) bool {
+	if sinceDays <= 0 {
+		return true
+	}
+
+	t, err := time.Parse(time.RFC3339, published)
+	if err != nil {
+		return false
+	}
+
+	cutoff := time.Now().AddDate(0, 0, -sinceDays)
+	return t.After(cutoff)
 }
 
 func closeResponse(resp *http.Response) {

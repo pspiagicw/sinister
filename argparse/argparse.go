@@ -35,10 +35,13 @@ func (s *StatusCMD) Run(o *Opts) error {
 }
 
 type UpdateCMD struct {
-	URL    []string `name:"url" help:"Fetch these RSS feeds instead of config URLs."`
-	Limit  int      `name:"limit" default:"0" help:"Process at most N feed entries per URL (0 = all)."`
-	DryRun bool     `name:"dry-run" help:"Show what would be inserted without writing to the database."`
-	JSON   bool     `name:"json" help:"Print update summary in JSON format."`
+	URL       []string `name:"url" help:"Fetch these RSS feeds instead of config URLs."`
+	Limit     int      `name:"limit" default:"0" help:"Process at most N feed entries per URL (0 = all)."`
+	SinceDays int      `name:"since-days" default:"0" help:"Only process videos published in the last N days (0 = no filter)."`
+	Retries   int      `name:"retries" default:"2" help:"Retry failed feed fetches this many times."`
+	Timeout   int      `name:"timeout" default:"30" help:"HTTP timeout in seconds for each feed request."`
+	DryRun    bool     `name:"dry-run" help:"Show what would be inserted without writing to the database."`
+	JSON      bool     `name:"json" help:"Print update summary in JSON format."`
 }
 
 func (u *UpdateCMD) Run(o *Opts) error {
@@ -46,6 +49,9 @@ func (u *UpdateCMD) Run(o *Opts) error {
 		ConfigPath: o.Config,
 		URLs:       u.URL,
 		Limit:      u.Limit,
+		SinceDays:  u.SinceDays,
+		Retries:    u.Retries,
+		Timeout:    u.Timeout,
 		DryRun:     u.DryRun,
 		JSON:       u.JSON,
 	})
