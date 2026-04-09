@@ -5,12 +5,10 @@ package manage
 //
 // 	"github.com/pspiagicw/goreland"
 // 	"github.com/pspiagicw/sinister/database"
-// 	"github.com/pspiagicw/sinister/help"
 // )
 
 // func parseBingeArgs(opts *argparse.Opts) {
 // 	flag := flag.NewFlagSet("sinister binge", flag.ExitOnError)
-// 	flag.Usage = help.HelpBinge
 // 	flag.Parse(opts.Args[1:])
 // }
 // func Binge(opts *argparse.Opts) {

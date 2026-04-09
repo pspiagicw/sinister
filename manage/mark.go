@@ -6,12 +6,10 @@ import (
 // "github.com/pspiagicw/goreland"
 // // "github.com/pspiagicw/sinister/argparse"
 // "github.com/pspiagicw/sinister/database"
-// "github.com/pspiagicw/sinister/help"
 )
 
 // func parseMarkArgs(opts *argparse.Opts) {
 // 	flag := flag.NewFlagSet("sinister mark", flag.ExitOnError)
-// 	flag.Usage = help.HelpMark
 // 	flag.Parse(opts.Args[1:])
 // }
 //

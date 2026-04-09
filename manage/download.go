@@ -16,14 +16,12 @@ package manage
 // 	"github.com/pspiagicw/sinister/config"
 // 	"github.com/pspiagicw/sinister/database"
 // 	"github.com/pspiagicw/sinister/feed"
-// 	"github.com/pspiagicw/sinister/help"
 // )
 
 // func parseDownloadArgs(opts *argparse.Opts) {
 // 	flag := flag.NewFlagSet("sinister download", flag.ExitOnError)
 // 	flag.BoolVar(&opts.NoSpinner, "no-spinner", false, "Disable spinner")
 // 	flag.BoolVar(&opts.Format, "select-format", false, "Select format manually")
-// 	flag.Usage = help.HelpDownload
 // 	flag.Parse(opts.Args[1:])
 // }
 //

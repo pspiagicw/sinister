@@ -11,12 +11,10 @@ import (
 // "github.com/pspiagicw/sinister/config"
 // "github.com/pspiagicw/sinister/database"
 // "github.com/pspiagicw/sinister/feed"
-// "github.com/pspiagicw/sinister/help"
 )
 
 // func parseUpdateArgs(opts *argparse.Opts) {
 // 	flag := flag.NewFlagSet("sinister update", flag.ExitOnError)
-// 	flag.Usage = help.HelpUpdate
 // 	flag.Parse(opts.Args[1:])
 // }
 // func Update(opts *argparse.Opts) {

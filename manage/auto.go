@@ -8,7 +8,6 @@ package manage
 // 	"github.com/pspiagicw/goreland"
 // 	"github.com/pspiagicw/sinister/database"
 // 	"github.com/pspiagicw/sinister/feed"
-// 	"github.com/pspiagicw/sinister/help"
 // )
 
 // func parseAutoOpts(opts *argparse.Opts) {
@@ -16,7 +15,6 @@ package manage
 // 	flag.IntVar(&opts.Days, "days", 0, "Maximum number of days to download")
 // 	flag.BoolVar(&opts.NoSync, "no-sync", false, "Disable spinner")
 // 	flag.BoolVar(&opts.MarkWatched, "mark-watched", false, "Mark videos as watched when rejected")
-// 	flag.Usage = help.HelpAuto
 // 	flag.Parse(opts.Args[1:])
 // }
 //
