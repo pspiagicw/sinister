@@ -48,6 +48,7 @@ func Download(opts DownloadOptions) {
 	failedCount := 0
 
 	for _, entry := range entries {
+		goreland.LogInfo("Starting download: %s", entry.Title)
 		if err := downloadEntry(&client, conf.VideoFolder, conf.Quality, entry); err != nil {
 			failedCount++
 			goreland.LogError("Skipping %s: %v", entry.Title, err)
@@ -133,7 +134,8 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 
 	if videoFormat.AudioChannels > 0 {
 		outputPath := getOutputPath(videoFolder, entry, videoFormat)
-		return downloadStreamToFile(client, video, videoFormat, outputPath)
+		goreland.LogInfo("Using muxed format: %s", videoFormat.QualityLabel)
+		return downloadStreamToFile(client, video, videoFormat, outputPath, "video")
 	}
 
 	audioFormat, err := getBestAudioFormat(video)
@@ -151,12 +153,15 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 	audioTempPath := filepath.Join(tempDir, "audio."+extensionFromMimeType(audioFormat.MimeType))
 	outputPath := filepath.Join(videoFolder, entry.Slug+".mkv")
 
-	if err := downloadStreamToFile(client, video, videoFormat, videoTempPath); err != nil {
+	goreland.LogInfo("Using high-quality video format: %s", videoFormat.QualityLabel)
+	if err := downloadStreamToFile(client, video, videoFormat, videoTempPath, "video"); err != nil {
 		return err
 	}
-	if err := downloadStreamToFile(client, video, audioFormat, audioTempPath); err != nil {
+	goreland.LogInfo("Using audio format bitrate: %d", audioFormat.Bitrate)
+	if err := downloadStreamToFile(client, video, audioFormat, audioTempPath, "audio"); err != nil {
 		return err
 	}
+	goreland.LogInfo("Merging audio and video with ffmpeg")
 	if err := mergeVideoAndAudio(videoTempPath, audioTempPath, outputPath); err != nil {
 		return err
 	}
@@ -242,8 +247,8 @@ func isAudioFormat(format youtube.Format) bool {
 	return strings.HasPrefix(parsed, "audio/")
 }
 
-func downloadStreamToFile(client *youtube.Client, video *youtube.Video, format *youtube.Format, outputPath string) error {
-	stream, _, err := client.GetStream(video, format)
+func downloadStreamToFile(client *youtube.Client, video *youtube.Video, format *youtube.Format, outputPath, label string) error {
+	stream, size, err := client.GetStream(video, format)
 	if err != nil {
 		return fmt.Errorf("error getting stream: %w", err)
 	}
@@ -255,10 +260,12 @@ func downloadStreamToFile(client *youtube.Client, video *youtube.Video, format *
 	}
 	defer file.Close()
 
-	if _, err := io.Copy(file, stream); err != nil {
+	goreland.LogInfo("Downloading %s stream -> %s", label, outputPath)
+	if err := copyWithProgress(file, stream, size, label); err != nil {
 		return fmt.Errorf("error writing file %s: %w", outputPath, err)
 	}
 
+	goreland.LogInfo("Finished %s stream", label)
 	return nil
 }
 
@@ -275,10 +282,48 @@ func mergeVideoAndAudio(videoPath, audioPath, outputPath string) error {
 		"-c", "copy",
 		outputPath,
 	)
-
-	output, err := cmd.CombinedOutput()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("ffmpeg merge failed: %v (%s)", err, strings.TrimSpace(string(output)))
+		return fmt.Errorf("ffmpeg merge failed: %w", err)
+	}
+
+	return nil
+}
+
+func copyWithProgress(dst io.Writer, src io.Reader, total int64, label string) error {
+	buffer := make([]byte, 1024*1024)
+	var downloaded int64
+	lastLoggedPercent := int64(-1)
+	var nextLogBytes int64 = 50 * 1024 * 1024
+
+	for {
+		n, readErr := src.Read(buffer)
+		if n > 0 {
+			if _, writeErr := dst.Write(buffer[:n]); writeErr != nil {
+				return writeErr
+			}
+
+			downloaded += int64(n)
+			if total > 0 {
+				percent := downloaded * 100 / total
+				if percent >= lastLoggedPercent+10 {
+					lastLoggedPercent = percent - (percent % 10)
+					goreland.LogInfo("%s download progress: %d%%", label, lastLoggedPercent)
+				}
+			} else if downloaded >= nextLogBytes {
+				goreland.LogInfo("%s download progress: %d MB", label, downloaded/(1024*1024))
+				nextLogBytes += 50 * 1024 * 1024
+			}
+		}
+
+		if readErr == io.EOF {
+			break
+		}
+		if readErr != nil {
+			return readErr
+		}
 	}
 
 	return nil
