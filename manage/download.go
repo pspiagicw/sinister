@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gosimple/slug"
 	"github.com/kkdai/youtube/v2"
 	"github.com/pspiagicw/goreland"
 	"github.com/pspiagicw/sinister/config"
@@ -151,7 +152,7 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 
 	videoTempPath := filepath.Join(tempDir, "video."+extensionFromMimeType(videoFormat.MimeType))
 	audioTempPath := filepath.Join(tempDir, "audio."+extensionFromMimeType(audioFormat.MimeType))
-	outputPath := filepath.Join(videoFolder, entry.Slug+".mkv")
+	outputPath := filepath.Join(videoFolder, outputBaseName(entry)+".mkv")
 
 	goreland.LogInfo("Using high-quality video format: %s", videoFormat.QualityLabel)
 	if err := downloadStreamToFile(client, video, videoFormat, videoTempPath, "video"); err != nil {
@@ -377,7 +378,18 @@ func getOutputPath(videoFolder string, entry feed.Entry, format *youtube.Format)
 	if ext == "" {
 		ext = "mp4"
 	}
-	return filepath.Join(videoFolder, entry.Slug+"."+ext)
+	return filepath.Join(videoFolder, outputBaseName(entry)+"."+ext)
+}
+
+func outputBaseName(entry feed.Entry) string {
+	name := slug.Make(strings.TrimSpace(entry.Author.Name + " - " + entry.Title))
+	if name != "" {
+		return name
+	}
+	if strings.TrimSpace(entry.Slug) != "" {
+		return entry.Slug
+	}
+	return "video"
 }
 
 func extensionFromMimeType(mimeType string) string {
