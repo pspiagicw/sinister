@@ -108,6 +108,59 @@ func QueryUnwatched() []feed.Entry {
 	return entries
 }
 
+func QueryDownloadedCreators() []string {
+	db := openDB()
+	defer closeDB(db)
+
+	rows, err := db.Query("SELECT DISTINCT author FROM entries WHERE filepath IS NOT NULL AND filepath != ''")
+	if err != nil {
+		goreland.LogFatal("Error while querying: %v", err)
+	}
+	defer closeRows(rows)
+
+	return scanStrings(rows)
+}
+
+func QueryDownloaded() []feed.Entry {
+	db := openDB()
+	defer closeDB(db)
+
+	rows := runQuery(db, "SELECT * FROM entries WHERE filepath IS NOT NULL AND filepath != ''")
+	defer closeRows(rows)
+
+	var entries []feed.Entry
+	for rows.Next() {
+		entry := scanEntry(rows)
+		entries = append(entries, *entry)
+	}
+
+	if err := rows.Err(); err != nil {
+		goreland.LogFatal("Error while iterating rows: %v", err)
+	}
+
+	return entries
+}
+
+func QueryDownloadedByCreator(creator string) []feed.Entry {
+	db := openDB()
+	defer closeDB(db)
+
+	rows := runQuery(db, "SELECT * FROM entries WHERE author = ? AND filepath IS NOT NULL AND filepath != ''", creator)
+	defer closeRows(rows)
+
+	var entries []feed.Entry
+	for rows.Next() {
+		entry := scanEntry(rows)
+		entries = append(entries, *entry)
+	}
+
+	if err := rows.Err(); err != nil {
+		goreland.LogFatal("Error while iterating rows: %v", err)
+	}
+
+	return entries
+}
+
 func QueryCreatorStats() []CreatorStat {
 	db := openDB()
 	defer closeDB(db)

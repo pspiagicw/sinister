@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/adrg/xdg"
 	_ "github.com/mattn/go-sqlite3"
@@ -32,6 +33,36 @@ func UpdateWatched(entry *feed.Entry) {
 	}
 }
 
+func UpdateUnwatched(entry *feed.Entry) {
+	db := openDB()
+	defer closeDB(db)
+
+	_, err := db.Exec("UPDATE entries SET watched = 0 WHERE slug = ?", entry.Slug)
+	if err != nil {
+		goreland.LogFatal("Error while updating watched status: %v", err)
+	}
+}
+
+func UpdateFilePath(slug, filePath string) {
+	db := openDB()
+	defer closeDB(db)
+
+	_, err := db.Exec("UPDATE entries SET filepath = ? WHERE slug = ?", filePath, slug)
+	if err != nil {
+		goreland.LogFatal("Error while updating filepath: %v", err)
+	}
+}
+
+func ClearFilePath(slug string) {
+	db := openDB()
+	defer closeDB(db)
+
+	_, err := db.Exec("UPDATE entries SET filepath = NULL WHERE slug = ?", slug)
+	if err != nil {
+		goreland.LogFatal("Error while clearing filepath: %v", err)
+	}
+}
+
 func MarkAllUnwatched() int {
 	db := openDB()
 	defer closeDB(db)
@@ -58,6 +89,7 @@ func openDB() *sql.DB {
 	}
 
 	ensureTableExists(db)
+	migrateDB(db)
 
 	return db
 }
@@ -74,6 +106,13 @@ func ensureTableExists(db *sql.DB) {
 	_, err := db.Exec(createEntriesTableSQL)
 	if err != nil {
 		goreland.LogFatal("Error while creating table: %v", err)
+	}
+}
+
+func migrateDB(db *sql.DB) {
+	_, err := db.Exec("ALTER TABLE entries ADD COLUMN filepath TEXT")
+	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
+		goreland.LogFatal("Error while migrating database: %v", err)
 	}
 }
 func scanStrings(rows *sql.Rows) []string {
@@ -120,10 +159,15 @@ func closeRows(rows *sql.Rows) {
 func scanEntry(s scanner) *feed.Entry {
 	entry := new(feed.Entry)
 	var id int
+	var filePath sql.NullString
 
-	err := s.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug)
+	err := s.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug, &filePath)
 	if err != nil {
 		goreland.LogFatal("Error while scanning: %v", err)
+	}
+
+	if filePath.Valid {
+		entry.FilePath = filePath.String
 	}
 
 	return entry

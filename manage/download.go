@@ -50,7 +50,8 @@ func Download(opts DownloadOptions) {
 
 	for _, entry := range entries {
 		goreland.LogInfo("Starting download: %s", entry.Title)
-		if err := downloadEntry(&client, conf.VideoFolder, conf.Quality, entry); err != nil {
+		outputPath, err := downloadEntry(&client, conf.VideoFolder, conf.Quality, entry)
+		if err != nil {
 			failedCount++
 			goreland.LogError("Skipping %s: %v", entry.Title, err)
 			continue
@@ -58,6 +59,7 @@ func Download(opts DownloadOptions) {
 
 		entryCopy := entry
 		database.UpdateWatched(&entryCopy)
+		database.UpdateFilePath(entry.Slug, outputPath)
 		successCount++
 		goreland.LogSuccess("Downloaded: %s", entry.Title)
 	}
@@ -110,43 +112,43 @@ func parsePublished(value string) (time.Time, bool) {
 	return t, true
 }
 
-func downloadEntry(client *youtube.Client, videoFolder, quality string, entry feed.Entry) error {
+func downloadEntry(client *youtube.Client, videoFolder, quality string, entry feed.Entry) (string, error) {
 	if isShortURL(entry.Link.URL) {
-		return fmt.Errorf("shorts are skipped")
+		return "", fmt.Errorf("shorts are skipped")
 	}
 
 	videoID, err := getVideoID(entry.Link.URL)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	video, err := client.GetVideo(videoID)
 	if err != nil {
-		return fmt.Errorf("error getting video metadata: %w", err)
+		return "", fmt.Errorf("error getting video metadata: %w", err)
 	}
 	if video.Duration > maxDownloadDuration {
-		return fmt.Errorf("video duration %s exceeds 1h limit", video.Duration.Round(time.Second))
+		return "", fmt.Errorf("video duration %s exceeds 1h limit", video.Duration.Round(time.Second))
 	}
 
 	videoFormat, err := getBestVideoFormat(video, quality)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if videoFormat.AudioChannels > 0 {
 		outputPath := getOutputPath(videoFolder, entry, videoFormat)
 		goreland.LogInfo("Using muxed format: %s", videoFormat.QualityLabel)
-		return downloadStreamToFile(client, video, videoFormat, outputPath, "video")
+		return outputPath, downloadStreamToFile(client, video, videoFormat, outputPath, "video")
 	}
 
 	audioFormat, err := getBestAudioFormat(video)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	tempDir, err := os.MkdirTemp("", "sinister-download-*")
 	if err != nil {
-		return fmt.Errorf("error creating temp dir: %w", err)
+		return "", fmt.Errorf("error creating temp dir: %w", err)
 	}
 	defer os.RemoveAll(tempDir)
 
@@ -156,18 +158,18 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 
 	goreland.LogInfo("Using high-quality video format: %s", videoFormat.QualityLabel)
 	if err := downloadStreamToFile(client, video, videoFormat, videoTempPath, "video"); err != nil {
-		return err
+		return "", err
 	}
 	goreland.LogInfo("Using audio format bitrate: %d", audioFormat.Bitrate)
 	if err := downloadStreamToFile(client, video, audioFormat, audioTempPath, "audio"); err != nil {
-		return err
+		return "", err
 	}
 	goreland.LogInfo("Merging audio and video with ffmpeg")
 	if err := mergeVideoAndAudio(videoTempPath, audioTempPath, outputPath); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return outputPath, nil
 }
 
 func getBestVideoFormat(video *youtube.Video, quality string) (*youtube.Format, error) {

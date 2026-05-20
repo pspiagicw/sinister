@@ -4,6 +4,7 @@ type SyncOptions struct {
 	ConfigPath string
 	Update     UpdateOptions
 	Download   DownloadOptions
+	Delete     DeleteOptions
 }
 
 func Sync(opts SyncOptions) {
@@ -15,4 +16,8 @@ func Sync(opts SyncOptions) {
 
 	Update(updateOpts)
 	Download(downloadOpts)
+
+	if opts.Delete.Days > 0 {
+		Delete(opts.Delete)
+	}
 }

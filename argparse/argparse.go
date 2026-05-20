@@ -133,6 +133,25 @@ func (c *CleanCMD) Run(o *Opts) error {
 	return nil
 }
 
+type DeleteCMD struct {
+	Creator       string   `name:"creator" help:"Delete downloaded videos for this creator."`
+	Slug          []string `name:"slug" help:"Delete videos by slug."`
+	Days          int      `name:"days" default:"0" help:"Delete videos older than N days (0 = no filter)."`
+	DryRun        bool     `name:"dry-run" help:"Preview what would be deleted without removing files."`
+	MarkUnwatched bool     `name:"mark-unwatched" help:"Also mark deleted videos as unwatched so they can be re-downloaded."`
+}
+
+func (d *DeleteCMD) Run(o *Opts) error {
+	manage.Delete(manage.DeleteOptions{
+		Creator:       d.Creator,
+		Slugs:         d.Slug,
+		Days:          d.Days,
+		DryRun:        d.DryRun,
+		MarkUnwatched: d.MarkUnwatched,
+	})
+	return nil
+}
+
 type SyncCMD struct {
 	URL       []string `name:"url" help:"Fetch these RSS feeds instead of config URLs."`
 	Limit     int      `name:"limit" default:"0" help:"Process at most N feed entries per URL (0 = all)."`
@@ -161,6 +180,10 @@ func (s *SyncCMD) Run(o *Opts) error {
 			Days:   s.Days,
 			Videos: s.Videos,
 		},
+		Delete: manage.DeleteOptions{
+			Days:   s.Days,
+			DryRun: s.DryRun,
+		},
 	})
 	return nil
 }
@@ -177,6 +200,7 @@ var CLI struct {
 	List     ListCMD     `cmd:"" help:"List channels and video counts."`
 	Add      AddCMD      `cmd:"" help:"Add a channel feed URL to config from a YouTube video URL."`
 	Clean    CleanCMD    `cmd:"" help:"Remove RSS feed URLs from config that return 404."`
+	Delete   DeleteCMD   `cmd:"" help:"Delete downloaded video files."`
 	Sync     SyncCMD     `cmd:"" help:"Run update and then download in one command."`
 }
 

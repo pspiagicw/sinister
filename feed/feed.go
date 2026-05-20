@@ -22,6 +22,7 @@ type Entry struct {
 	Link      Link   `xml:"link"`
 	Slug      string
 	Watched   int
+	FilePath  string
 }
 type Link struct {
 	URL string `xml:"href,attr"`
