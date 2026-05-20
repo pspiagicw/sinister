@@ -23,6 +23,7 @@ import (
 )
 
 const maxDownloadDuration = time.Hour
+const minDownloadDuration = 2 * time.Minute
 
 type DownloadOptions struct {
 	ConfigPath string
@@ -125,6 +126,9 @@ func downloadEntry(client *youtube.Client, videoFolder, quality string, entry fe
 	video, err := client.GetVideo(videoID)
 	if err != nil {
 		return "", fmt.Errorf("error getting video metadata: %w", err)
+	}
+	if video.Duration < minDownloadDuration {
+		return "", fmt.Errorf("video duration %s is under 2m limit", video.Duration.Round(time.Second))
 	}
 	if video.Duration > maxDownloadDuration {
 		return "", fmt.Errorf("video duration %s exceeds 1h limit", video.Duration.Round(time.Second))
