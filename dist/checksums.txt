@@ -1,0 +1,1 @@
+4a10ed4e1dd4afe7ddc40556cb8c3d5f0792cd14e6502109c72386e7b39a4764  sinister_v0.2.0_linux_amd64.tar.gz

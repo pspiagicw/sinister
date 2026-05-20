@@ -26,7 +26,7 @@ func confirm(message, error string) {
 
 	survey.AskOne(&prompt, &confirm)
 	if !confirm {
-		goreland.LogFatal(error)
+		goreland.LogFatal("%s", error)
 	}
 
 }

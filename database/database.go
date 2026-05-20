@@ -80,6 +80,16 @@ func MarkAllUnwatched() int {
 	return int(rowsAffected)
 }
 
+// dbPathOverride is used by tests to redirect to an isolated database.
+var dbPathOverride string
+
+// SetDBPath redirects all database operations to the given path.
+// Pass an empty string to restore the default XDG path.
+// Intended for use in tests only.
+func SetDBPath(path string) {
+	dbPathOverride = path
+}
+
 func openDB() *sql.DB {
 	dbPath := getDBPath()
 
@@ -94,6 +104,9 @@ func openDB() *sql.DB {
 	return db
 }
 func getDBPath() string {
+	if dbPathOverride != "" {
+		return dbPathOverride
+	}
 	path, err := xdg.DataFile("sinister/sinister.db")
 
 	if err != nil {

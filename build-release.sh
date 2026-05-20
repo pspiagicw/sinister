@@ -5,12 +5,16 @@ BINARY_NAME="sinister"
 DIST_DIR="${DIST_DIR:-dist}"
 CGO_VALUE="${CGO_ENABLED:-1}"
 
-TARGETS=(
-  "linux/amd64"
-  "linux/arm64"
-  "darwin/amd64"
-  "darwin/arm64"
-)
+if [[ -n "${TARGETS:-}" ]]; then
+  IFS=',' read -ra TARGETS <<< "${TARGETS}"
+else
+  TARGETS=(
+    "linux/amd64"
+    "linux/arm64"
+    "darwin/amd64"
+    "darwin/arm64"
+  )
+fi
 
 usage() {
   cat <<'EOF'

@@ -25,10 +25,17 @@ import (
 const maxDownloadDuration = time.Hour
 const minDownloadDuration = 2 * time.Minute
 
+// VideoClient is the subset of youtube.Client used for downloads.
+type VideoClient interface {
+	GetVideo(videoID string) (*youtube.Video, error)
+	GetStream(video *youtube.Video, format *youtube.Format) (io.ReadCloser, int64, error)
+}
+
 type DownloadOptions struct {
 	ConfigPath string
 	Days       int
 	Videos     int
+	Client     VideoClient // nil = real youtube.Client
 }
 
 func Download(opts DownloadOptions) {
@@ -45,13 +52,18 @@ func Download(opts DownloadOptions) {
 		goreland.LogFatal("Error while creating video folder: %v", err)
 	}
 
-	client := youtube.Client{}
+	var client VideoClient
+	if opts.Client != nil {
+		client = opts.Client
+	} else {
+		client = &youtube.Client{}
+	}
 	successCount := 0
 	failedCount := 0
 
 	for _, entry := range entries {
 		goreland.LogInfo("Starting download: %s", entry.Title)
-		outputPath, err := downloadEntry(&client, conf.VideoFolder, conf.Quality, entry)
+		outputPath, err := downloadEntry(client, conf.VideoFolder, conf.Quality, entry)
 		if err != nil {
 			failedCount++
 			goreland.LogError("Skipping %s: %v", entry.Title, err)
@@ -113,7 +125,7 @@ func parsePublished(value string) (time.Time, bool) {
 	return t, true
 }
 
-func downloadEntry(client *youtube.Client, videoFolder, quality string, entry feed.Entry) (string, error) {
+func downloadEntry(client VideoClient, videoFolder, quality string, entry feed.Entry) (string, error) {
 	if isShortURL(entry.Link.URL) {
 		return "", fmt.Errorf("shorts are skipped")
 	}
@@ -254,7 +266,7 @@ func isAudioFormat(format youtube.Format) bool {
 	return strings.HasPrefix(parsed, "audio/")
 }
 
-func downloadStreamToFile(client *youtube.Client, video *youtube.Video, format *youtube.Format, outputPath, label string) error {
+func downloadStreamToFile(client VideoClient, video *youtube.Video, format *youtube.Format, outputPath, label string) error {
 	stream, size, err := client.GetStream(video, format)
 	if err != nil {
 		return fmt.Errorf("error getting stream: %w", err)

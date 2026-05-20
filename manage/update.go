@@ -25,6 +25,7 @@ type UpdateOptions struct {
 	Timeout    int
 	DryRun     bool
 	JSON       bool
+	Fetcher    func(url string, timeoutSec int) ([]byte, error) // nil = real HTTP
 }
 
 type UpdateSummary struct {
@@ -45,7 +46,11 @@ func Update(opts UpdateOptions) {
 		goreland.LogInfo("Fetching %s", url)
 		summary.FeedsProcessed++
 
-		f, err := fetchFeedWithRetry(url, opts)
+		fetcher := opts.Fetcher
+		if fetcher == nil {
+			fetcher = getContents
+		}
+		f, err := fetchFeedWithRetry(url, opts, fetcher)
 		if err != nil {
 			summary.FeedsSkipped++
 			goreland.LogError("Skipping feed %s: %v", url, err)
@@ -124,7 +129,7 @@ func printUpdateSummary(summary UpdateSummary, asJSON bool) {
 	)
 }
 
-func fetchFeedWithRetry(url string, opts UpdateOptions) (*feed.Feed, error) {
+func fetchFeedWithRetry(url string, opts UpdateOptions, fetcher func(string, int) ([]byte, error)) (*feed.Feed, error) {
 	attempts := opts.Retries + 1
 	if attempts < 1 {
 		attempts = 1
@@ -132,7 +137,7 @@ func fetchFeedWithRetry(url string, opts UpdateOptions) (*feed.Feed, error) {
 
 	var lastErr error
 	for attempt := 1; attempt <= attempts; attempt++ {
-		f, err := fetchFeed(url, opts.Timeout)
+		f, err := fetchFeed(url, opts.Timeout, fetcher)
 		if err == nil {
 			return f, nil
 		}
@@ -147,8 +152,8 @@ func fetchFeedWithRetry(url string, opts UpdateOptions) (*feed.Feed, error) {
 	return nil, lastErr
 }
 
-func fetchFeed(url string, timeoutSec int) (*feed.Feed, error) {
-	body, err := getContents(url, timeoutSec)
+func fetchFeed(url string, timeoutSec int, fetcher func(string, int) ([]byte, error)) (*feed.Feed, error) {
+	body, err := fetcher(url, timeoutSec)
 	if err != nil {
 		return nil, err
 	}
