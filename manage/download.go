@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mime"
+	"net/http"
 	neturl "net/url"
 	"os"
 	"os/exec"
@@ -151,22 +152,41 @@ func downloadEntry(client VideoClient, videoFolder, quality string, entry feed.E
 		return "", err
 	}
 
+	tempDir, err := os.MkdirTemp("", "sinister-download-*")
+	if err != nil {
+		return "", fmt.Errorf("error creating temp dir: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	thumbnailPath := downloadThumbnail(bestThumbnailURL(video.Thumbnails), tempDir)
+
 	if videoFormat.AudioChannels > 0 {
 		outputPath := getOutputPath(videoFolder, entry, videoFormat)
+		tempVideoPath := filepath.Join(tempDir, "muxed."+extensionFromMimeType(videoFormat.MimeType))
 		goreland.LogInfo("Using muxed format: %s", videoFormat.QualityLabel)
-		return outputPath, downloadStreamToFile(client, video, videoFormat, outputPath, "video")
+		if err := downloadStreamToFile(client, video, videoFormat, tempVideoPath, "video"); err != nil {
+			return "", err
+		}
+		if thumbnailPath != "" {
+			goreland.LogInfo("Embedding thumbnail")
+			if err := embedThumbnailIntoFile(tempVideoPath, thumbnailPath, outputPath); err != nil {
+				goreland.LogInfo("Thumbnail embedding failed, saving without thumbnail: %v", err)
+				if err2 := moveFile(tempVideoPath, outputPath); err2 != nil {
+					return "", err2
+				}
+			}
+		} else {
+			if err := moveFile(tempVideoPath, outputPath); err != nil {
+				return "", err
+			}
+		}
+		return outputPath, nil
 	}
 
 	audioFormat, err := getBestAudioFormat(video)
 	if err != nil {
 		return "", err
 	}
-
-	tempDir, err := os.MkdirTemp("", "sinister-download-*")
-	if err != nil {
-		return "", fmt.Errorf("error creating temp dir: %w", err)
-	}
-	defer os.RemoveAll(tempDir)
 
 	videoTempPath := filepath.Join(tempDir, "video."+extensionFromMimeType(videoFormat.MimeType))
 	audioTempPath := filepath.Join(tempDir, "audio."+extensionFromMimeType(audioFormat.MimeType))
@@ -181,7 +201,7 @@ func downloadEntry(client VideoClient, videoFolder, quality string, entry feed.E
 		return "", err
 	}
 	goreland.LogInfo("Merging audio and video with ffmpeg")
-	if err := mergeVideoAndAudio(videoTempPath, audioTempPath, outputPath); err != nil {
+	if err := mergeVideoAndAudio(videoTempPath, audioTempPath, thumbnailPath, outputPath); err != nil {
 		return "", err
 	}
 
@@ -288,27 +308,113 @@ func downloadStreamToFile(client VideoClient, video *youtube.Video, format *yout
 	return nil
 }
 
-func mergeVideoAndAudio(videoPath, audioPath, outputPath string) error {
+func mergeVideoAndAudio(videoPath, audioPath, thumbnailPath, outputPath string) error {
 	if _, err := exec.LookPath("ffmpeg"); err != nil {
 		return fmt.Errorf("ffmpeg is required for high-quality downloads with audio")
 	}
 
-	cmd := exec.Command(
-		"ffmpeg",
-		"-y",
-		"-i", videoPath,
-		"-i", audioPath,
-		"-c", "copy",
-		outputPath,
-	)
+	args := []string{"-y", "-i", videoPath, "-i", audioPath}
+	if thumbnailPath != "" {
+		args = append(args,
+			"-i", thumbnailPath,
+			"-map", "0", "-map", "1", "-map", "2",
+			"-c", "copy",
+			"-disposition:v:1", "attached_pic",
+		)
+	} else {
+		args = append(args, "-c", "copy")
+	}
+	args = append(args, outputPath)
+
+	cmd := exec.Command("ffmpeg", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("ffmpeg merge failed: %w", err)
 	}
 
 	return nil
+}
+
+func embedThumbnailIntoFile(inputPath, thumbnailPath, outputPath string) error {
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		return fmt.Errorf("ffmpeg not found")
+	}
+
+	cmd := exec.Command(
+		"ffmpeg", "-y",
+		"-i", inputPath,
+		"-i", thumbnailPath,
+		"-map", "0", "-map", "1",
+		"-c", "copy",
+		"-disposition:v:1", "attached_pic",
+		outputPath,
+	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("ffmpeg thumbnail embed failed: %w", err)
+	}
+
+	return nil
+}
+
+func bestThumbnailURL(thumbnails youtube.Thumbnails) string {
+	if len(thumbnails) == 0 {
+		return ""
+	}
+	best := thumbnails[0]
+	for _, t := range thumbnails[1:] {
+		if t.Width > best.Width {
+			best = t
+		}
+	}
+	return best.URL
+}
+
+func downloadThumbnail(thumbnailURL, dir string) string {
+	if thumbnailURL == "" {
+		return ""
+	}
+	resp, err := http.Get(thumbnailURL) //nolint:noctx
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+
+	path := filepath.Join(dir, "thumbnail.jpg")
+	f, err := os.Create(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, resp.Body); err != nil {
+		return ""
+	}
+	return path
+}
+
+func moveFile(src, dst string) error {
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, in); err != nil {
+		return err
+	}
+	return out.Close()
 }
 
 func copyWithProgress(dst io.Writer, src io.Reader, total int64, label string) error {
