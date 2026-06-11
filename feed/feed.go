@@ -23,6 +23,7 @@ type Entry struct {
 	Slug      string
 	Watched   int
 	FilePath  string
+	VideoID   string
 }
 type Link struct {
 	URL string `xml:"href,attr"`

@@ -86,6 +86,15 @@ func ExistsByTitle(title string) bool {
 	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE slug = ?", videoSlug) > 0
 }
 
+func ExistsByVideoID(videoID string) bool {
+	if videoID == "" {
+		return false
+	}
+	db := openDB()
+	defer closeDB(db)
+	return countQuery(db, "SELECT COUNT(*) FROM entries WHERE video_id = ?", videoID) > 0
+}
+
 func QueryUnwatched() []feed.Entry {
 	db := openDB()
 	defer closeDB(db)

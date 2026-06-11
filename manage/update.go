@@ -70,7 +70,9 @@ func Update(opts UpdateOptions) {
 
 			summary.EntriesSeen++
 			if opts.DryRun {
-				if database.ExistsByTitle(entry.Title) {
+				videoID := database.ExtractVideoID(entry.Link.URL)
+				exists := database.ExistsByVideoID(videoID) || database.ExistsByTitle(entry.Title)
+				if exists {
 					summary.Skipped++
 				} else {
 					summary.Inserted++

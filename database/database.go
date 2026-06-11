@@ -127,6 +127,53 @@ func migrateDB(db *sql.DB) {
 	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
 		goreland.LogFatal("Error while migrating database: %v", err)
 	}
+
+	_, err = db.Exec("ALTER TABLE entries ADD COLUMN video_id TEXT")
+	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
+		goreland.LogFatal("Error while migrating database: %v", err)
+	}
+
+	backfillVideoIDs(db)
+
+	_, err = db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_entries_video_id ON entries(video_id) WHERE video_id IS NOT NULL")
+	if err != nil {
+		goreland.LogFatal("Error while creating video_id index: %v", err)
+	}
+}
+
+func backfillVideoIDs(db *sql.DB) {
+	rows, err := db.Query("SELECT id, link FROM entries WHERE video_id IS NULL")
+	if err != nil {
+		goreland.LogFatal("Error while querying for backfill: %v", err)
+	}
+	defer rows.Close()
+
+	type row struct {
+		id   int64
+		link string
+	}
+	var pending []row
+	for rows.Next() {
+		var r row
+		if err := rows.Scan(&r.id, &r.link); err != nil {
+			goreland.LogFatal("Error while scanning backfill row: %v", err)
+		}
+		pending = append(pending, r)
+	}
+	if err := rows.Err(); err != nil {
+		goreland.LogFatal("Error while iterating backfill rows: %v", err)
+	}
+
+	for _, r := range pending {
+		videoID := ExtractVideoID(r.link)
+		if videoID == "" {
+			continue
+		}
+		_, err := db.Exec("UPDATE entries SET video_id = ? WHERE id = ?", videoID, r.id)
+		if err != nil {
+			goreland.LogFatal("Error while backfilling video_id: %v", err)
+		}
+	}
 }
 func scanStrings(rows *sql.Rows) []string {
 	var elements []string
@@ -173,14 +220,18 @@ func scanEntry(s scanner) *feed.Entry {
 	entry := new(feed.Entry)
 	var id int
 	var filePath sql.NullString
+	var videoID sql.NullString
 
-	err := s.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug, &filePath)
+	err := s.Scan(&id, &entry.Author.Name, &entry.Title, &entry.Published, &entry.Link.URL, &entry.Watched, &entry.Slug, &filePath, &videoID)
 	if err != nil {
 		goreland.LogFatal("Error while scanning: %v", err)
 	}
 
 	if filePath.Valid {
 		entry.FilePath = filePath.String
+	}
+	if videoID.Valid {
+		entry.VideoID = videoID.String
 	}
 
 	return entry
