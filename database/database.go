@@ -134,6 +134,7 @@ func migrateDB(db *sql.DB) {
 	}
 
 	backfillVideoIDs(db)
+	deduplicateByVideoID(db)
 
 	_, err = db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_entries_video_id ON entries(video_id) WHERE video_id IS NOT NULL")
 	if err != nil {
@@ -175,6 +176,20 @@ func backfillVideoIDs(db *sql.DB) {
 		}
 	}
 }
+func deduplicateByVideoID(db *sql.DB) {
+	// Keep the row with the highest ID for each video_id, delete the rest.
+	// This removes stale duplicates created by prior title-rename re-inserts.
+	_, err := db.Exec(`
+		DELETE FROM entries
+		WHERE video_id IS NOT NULL
+		  AND id NOT IN (
+		      SELECT MAX(id) FROM entries WHERE video_id IS NOT NULL GROUP BY video_id
+		  )`)
+	if err != nil {
+		goreland.LogFatal("Error while deduplicating entries: %v", err)
+	}
+}
+
 func scanStrings(rows *sql.Rows) []string {
 	var elements []string
 
